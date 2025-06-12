@@ -9,43 +9,43 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/public")
+@RequestMapping("/api")
 public class AdminController {
 
     @Autowired
     private IAdminService adminService;
 
-    @PostMapping("/login-admin")
+    @PostMapping("/public/login-admin")
     public ResponseEntity<Response> login(@RequestBody AdminDTO loginRequest) {
         Response response = adminService.loginAdmin(loginRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/register-admin")
+    @PostMapping("/admin/register-admin")
     public ResponseEntity<Response> register(@RequestBody AdminDTO request) {
         Response response = adminService.registerAdmin(request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/get-all-admins")
+    @GetMapping("/admin/get-all-admins")
     public ResponseEntity<Response> getAll() {
         Response response = adminService.getAllAdmins();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/get-admin-by-id/{id}")
+    @GetMapping("/admin/get-admin-by-id/{id}")
     public ResponseEntity<Response> getById(@PathVariable Long id) {
         Response response = adminService.getAdminById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @DeleteMapping("/delete-admin/{id}")
+    @DeleteMapping("/admin/delete-admin/{id}")
     public ResponseEntity<Response> delete(@PathVariable Long id) {
         Response response = adminService.deleteAdmin(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/update-admin/{id}")
+    @PutMapping("/admin/update-admin/{id}")
     public ResponseEntity<Response> update(@PathVariable Long id, @RequestBody AdminDTO request) {
         Response response = adminService.updateAdmin(id, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);

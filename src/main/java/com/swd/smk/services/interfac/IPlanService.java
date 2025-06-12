@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface IPlanService {
 
-    Response createPlan(PlanDTO planDTO);
+    Response createPlan(Long memberId, Long smokingLogId);
 
     Response updatePlan(Long planId, PlanDTO planDTO);
 

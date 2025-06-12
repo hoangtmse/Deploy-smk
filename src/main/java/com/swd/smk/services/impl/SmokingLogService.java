@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,7 +28,7 @@ public class SmokingLogService implements ISmokingLog {
         Response response = new Response();
         try {
             Optional<Member> memberOptional = memberRepository.findById(smokingLogDTO.getMemberId());
-            if (!memberOptional.isPresent()) {
+            if (memberOptional.isEmpty()) {
                 throw new OurException("Member not found with ID: " + smokingLogDTO.getMemberId());
             }
             SmokingLog smokingLog = new SmokingLog();
@@ -92,6 +93,16 @@ public class SmokingLogService implements ISmokingLog {
     public Response deleteSmokingLog(Long smokingLogId) {
         Response response = new Response();
         try {
+            Optional<SmokingLog> smokingLogOptional = smokingLogRepository.findById(smokingLogId);
+            if (!smokingLogOptional.isPresent()) {
+                throw new OurException("Smoking log not found with ID: " + smokingLogId);
+            }
+            SmokingLog smokingLog = smokingLogOptional.get();
+            smokingLog.setStatus(Status.DELETED);
+            smokingLog.setDateUpdated(LocalDate.now());
+            smokingLogRepository.save(smokingLog);
+            response.setStatusCode(200);
+            response.setMessage("Smoking log deleted successfully.");
 
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -107,6 +118,14 @@ public class SmokingLogService implements ISmokingLog {
     public Response getSmokingLogById(Long smokingLogId) {
         Response response = new Response();
         try {
+            Optional<SmokingLog> smokingLogOptional = smokingLogRepository.findById(smokingLogId);
+            if (!smokingLogOptional.isPresent()) {
+                throw new OurException("Smoking log not found with ID: " + smokingLogId);
+            }
+            SmokingLog smokingLog = smokingLogOptional.get();
+            response.setStatusCode(200);
+            response.setMessage("Smoking log retrieved successfully.");
+            response.setSmokingLog(Converter.convertSmokingLogToDTO(smokingLog));
 
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -122,6 +141,16 @@ public class SmokingLogService implements ISmokingLog {
     public Response getAllSmokingLogs() {
         Response response = new Response();
         try {
+            List<SmokingLog> smokingLogs = smokingLogRepository.findAll();
+            if (smokingLogs.isEmpty()) {
+                throw new OurException("No smoking logs found.");
+            }
+            List<SmokingLogDTO> smokingLogDTOs = smokingLogs.stream()
+                    .map(Converter::convertSmokingLogToDTO)
+                    .toList();
+            response.setStatusCode(200);
+            response.setMessage("Smoking logs retrieved successfully.");
+            response.setSmokingLogs(smokingLogDTOs);
 
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -132,4 +161,6 @@ public class SmokingLogService implements ISmokingLog {
         }
         return response;
     }
+
+
 }

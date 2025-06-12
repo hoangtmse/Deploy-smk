@@ -9,4 +9,6 @@ public interface IMembershipPackage {
     Response createMembershipPackage( MemberShipPackageDTO memberShipPackageDTO);
     Response updateMembershipPackage(Long id, MemberShipPackageDTO memberShipPackageDTO);
     Response deleteMembershipPackage(Long id);
+    Response buyMembershipPackage(Long id, Long memberId);
+    boolean checkMembershipPackage(Long memberId);
 }

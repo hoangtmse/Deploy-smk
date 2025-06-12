@@ -15,33 +15,39 @@ public class MembershipPackageController {
     @Autowired
     private IMembershipPackage membershipPackageService;
 
-    @GetMapping("/public/get-membership-package-by-id/{id}")
+    @GetMapping("/user/get-membership-package-by-id/{id}")
     public ResponseEntity<Response> getMembershipPackageById(@PathVariable Long id) {
         Response response = membershipPackageService.getMembershipPackageById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/public/get-all-membership-packages")
+    @GetMapping("/user/get-all-membership-packages")
     public ResponseEntity<Response> getAllMembershipPackages() {
         Response response = membershipPackageService.getAllMembershipPackages();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/public/create-membership-package")
+    @PostMapping("/admin/create-membership-package")
     public ResponseEntity<Response> createMembershipPackage(@RequestBody MemberShipPackageDTO membershipPackageDTO) {
         Response response = membershipPackageService.createMembershipPackage(membershipPackageDTO);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/public/update-membership-package/{id}")
+    @PutMapping("/admin/update-membership-package/{id}")
     public ResponseEntity<Response> updateMembershipPackage(@PathVariable Long id, @RequestBody MemberShipPackageDTO membershipPackageDTO) {
         Response response = membershipPackageService.updateMembershipPackage(id, membershipPackageDTO);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @DeleteMapping("/public/delete-membership-package/{id}")
+    @DeleteMapping("/admin/delete-membership-package/{id}")
     public ResponseEntity<Response> deleteMembershipPackage(@PathVariable Long id) {
         Response response = membershipPackageService.deleteMembershipPackage(id);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/user/buy-membership-package/{id}/member/{memberId}")
+    public ResponseEntity<Response> buyMembershipPackage(@PathVariable Long id, @PathVariable Long memberId) {
+        Response response = membershipPackageService.buyMembershipPackage(id, memberId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

@@ -43,7 +43,7 @@ public class AdminService implements IAdminService {
             Admin admin = new Admin();
             admin.setUsername(adminRequest.getUsername().trim());
             admin.setPassword(encodedPassword);
-            admin.setRole(adminRequest.getRole() != null ? adminRequest.getRole() : Role.ADMIN);
+            admin.setRole(Role.ADMIN);
             admin.setStatus(Status.ACTIVE);
             admin.setDateCreated(LocalDate.now());
             admin.setDateUpdated(LocalDate.now());
@@ -73,6 +73,7 @@ public class AdminService implements IAdminService {
             response.setStatusCode(200);
             response.setToken(token);
             response.setRole(admin.getRole());
+            response.setAdmin(Converter.convertAdminToDTO(admin));
             response.setExpirationTime("7 Days");
             response.setMessage("successful");
         } catch (OurException e) {

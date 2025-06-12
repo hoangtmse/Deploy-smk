@@ -15,12 +15,12 @@ public class PlanController {
     @Autowired
     private IPlanService planService;
 
-    @PostMapping("/public/create-plan/member/{memberId}")
-    public ResponseEntity<Response>  createPlan(@RequestBody PlanDTO planDTO, @PathVariable Long memberId) {
-        planDTO.setMemberId(memberId);
-        Response response = planService.createPlan(planDTO);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
+//    @PostMapping("/public/create-plan/member/{memberId}")
+//    public ResponseEntity<Response>  createPlan(@RequestBody PlanDTO planDTO, @PathVariable Long memberId) {
+////        planDTO.setMemberId(memberId);
+////        Response response = planService.createPlan(planDTO);
+//        return ResponseEntity.status(response.getStatusCode()).body(response);
+//    }
 
     @PutMapping("/public/update-plan/{planId}")
     public ResponseEntity<Response> updatePlan(@PathVariable Long planId, @RequestBody PlanDTO planDTO) {

@@ -21,7 +21,7 @@ public class AdminController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/admin/register-admin")
+    @PostMapping("/public/register-admin")
     public ResponseEntity<Response> register(@RequestBody AdminDTO request) {
         Response response = adminService.registerAdmin(request);
         return ResponseEntity.status(response.getStatusCode()).body(response);

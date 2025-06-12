@@ -28,25 +28,25 @@ public class MemberController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/public/get-all-users")
+    @GetMapping("/user/get-all-users")
     public ResponseEntity<Response> getAllUsers(){
         Response response = memberService.getAllMembers();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/public/get-member-by-id/{id}")
+    @GetMapping("/user/get-member-by-id/{id}")
     public ResponseEntity<Response> getUserById(@PathVariable Long id){
         Response response = memberService.getMemberById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @DeleteMapping("/public/delete-member/{id}")
+    @DeleteMapping("/admin/delete-member/{id}")
     public ResponseEntity<Response> deleteUser(@PathVariable Long id) {
         Response response = memberService.deleteMember(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/public/update-member/{id}")
+    @PutMapping("/member/update-member/{id}")
     public ResponseEntity<Response> updateUser(@PathVariable Long id, @RequestBody MemberDTO request) {
         Response response = memberService.updateMember(id, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);

@@ -5,10 +5,7 @@ import com.swd.smk.dto.Response;
 import com.swd.smk.services.interfac.IPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
@@ -24,25 +21,25 @@ public class PostController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/public/update-post/{postId}")
+    @PutMapping("/public/update-post/{postId}")
     public ResponseEntity<Response> updatePost(@PathVariable Long postId, PostDTO postDTO) {
         Response response = postService.updatePost(postId, postDTO);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/public/delete-post/{postId}")
+    @DeleteMapping("/public/delete-post/{postId}")
     public ResponseEntity<Response> deletePost(@PathVariable Long postId) {
         Response response = postService.deletePost(postId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/public/get-post/{postId}")
+    @GetMapping("/public/get-post/{postId}")
     public ResponseEntity<Response> getPostById(@PathVariable Long postId) {
         Response response = postService.getPostById(postId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/public/get-all-posts")
+    @GetMapping("/public/get-all-posts")
     public ResponseEntity<Response> getAllPosts() {
         Response response = postService.getAllPosts();
         return ResponseEntity.status(response.getStatusCode()).body(response);

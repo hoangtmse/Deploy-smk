@@ -104,6 +104,7 @@ public class MemberService implements IMemberService {
             response.setRole(member.getRole());
             response.setExpirationTime("7 Days");
             response.setMessage("successful");
+            response.setMember(Converter.convertMemberToDTO(member));
 
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -165,7 +166,7 @@ public class MemberService implements IMemberService {
             dto = Converter.convertMemberToDTO(member);
             response.setMember(dto);
             response.setStatusCode(200);
-            response.setMessage("Deleted successfully");
+            response.setMessage("Fetched successfully");
         }catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

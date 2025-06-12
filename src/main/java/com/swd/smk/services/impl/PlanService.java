@@ -7,8 +7,12 @@ import com.swd.smk.exception.OurException;
 import com.swd.smk.model.Member;
 import com.swd.smk.model.Plan;
 import com.swd.smk.repository.MemberRepository;
+import com.swd.smk.repository.MembershipPackageRepository;
 import com.swd.smk.repository.PlanRepository;
+import com.swd.smk.repository.SmokingLogRepository;
+import com.swd.smk.services.interfac.IMembershipPackage;
 import com.swd.smk.services.interfac.IPlanService;
+import com.swd.smk.services.interfac.ISmokingLog;
 import com.swd.smk.utils.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,29 +31,31 @@ public class PlanService implements IPlanService {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private MembershipPackageRepository membershipPackageRepository;
+
+    @Autowired
+    private SmokingLogRepository smokingLogRepository;
+
+    @Autowired
+    private IMembershipPackage membershipPackageService;
+
     @Override
-    public Response createPlan(PlanDTO planDTO) {
+    public Response createPlan(Long memberId, Long smokingLogId) {
         Response response = new Response();
         try {
             // Validate the planDTO fields
-            Optional<Member> memberOpt = memberRepository.findById(planDTO.getMemberId());
+            Optional<Member> memberOpt = memberRepository.findById(memberId);
             if (memberOpt.isEmpty()) {
-                throw new OurException("Member not found with ID: " + planDTO.getMemberId());
+                throw new OurException("Member not found with ID: " + memberId);
             }
-            Plan plan = new Plan();
-            plan.setMember(memberOpt.get());
-            plan.setPhases(planDTO.getPhases());
-            plan.setReason(planDTO.getReason());
-            plan.setStartDate(planDTO.getStartDate());
-            plan.setExpectedEndDate(planDTO.getExpectedEndDate());
-            plan.setStatus(Status.ACTIVE);
-            plan.setDateCreated(LocalDate.now());
-            plan.setDateUpdated(LocalDate.now());
+            if (membershipPackageService.checkMembershipPackage(memberId)){
 
-            plan = planRepository.save(plan);
-            response.setStatusCode(200);
-            response.setMessage("Plan created successfully");
-            response.setPlan(Converter.convertPlanToDTO(plan));
+            } else{
+
+            }
+
+
 
         } catch (OurException e) {
             response.setStatusCode(400);

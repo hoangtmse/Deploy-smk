@@ -37,6 +37,7 @@ public class SecurityConfig {
     private final String[] MEMBER_LIST = {"/api/member/**"};
     private final String[] COACH_LIST = {"/api/coach/**"};
     private final String[] PUBLIC_LIST = {"/api/public/**"};
+    private final String[] USER_LIST = {"/api/user/**"};
     private final String[] SWAGGERUI = {"/swagger-ui/**", "/v3/api-docs/**","/swagger-ui.html"};
     
     @Bean
@@ -47,9 +48,10 @@ public class SecurityConfig {
                        .requestMatchers(EMAIL_LIST).permitAll()
                        .requestMatchers(SWAGGERUI).permitAll()
                        .requestMatchers(PUBLIC_LIST).permitAll()
-                       .requestMatchers(ADMIN_LIST).hasAuthority("ADMIN")
-                       .requestMatchers(COACH_LIST).hasAuthority("COACH")
-                       .requestMatchers(MEMBER_LIST).hasAuthority("MEMBER")
+                       .requestMatchers(ADMIN_LIST).hasAuthority("ROLE_ADMIN")
+                       .requestMatchers(COACH_LIST).hasAnyAuthority("ROLE_COACH", "ROLE_ADMIN")
+                       .requestMatchers(MEMBER_LIST).hasAnyAuthority("ROLE_MEMBER", "ROLE_COACH", "ROLE_ADMIN")
+                        .requestMatchers(USER_LIST).authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

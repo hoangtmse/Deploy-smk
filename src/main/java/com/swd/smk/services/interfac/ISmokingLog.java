@@ -14,4 +14,5 @@ public interface ISmokingLog {
     Response getSmokingLogById(Long smokingLogId);
 
     Response getAllSmokingLogs();
+
 }

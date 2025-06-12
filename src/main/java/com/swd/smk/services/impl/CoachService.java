@@ -101,6 +101,7 @@ public class CoachService implements ICoachService {
             response.setRole(coach.getRole());
             response.setExpirationTime("7 Days");
             response.setMessage("successful");
+            response.setCoach(Converter.convertCoachToDTO(coach));
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

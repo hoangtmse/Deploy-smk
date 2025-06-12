@@ -43,27 +43,27 @@ public class PlanService implements IPlanService {
     @Override
     public Response createPlan(Long memberId, Long smokingLogId) {
         Response response = new Response();
-        try {
-            // Validate the planDTO fields
-            Optional<Member> memberOpt = memberRepository.findById(memberId);
-            if (memberOpt.isEmpty()) {
-                throw new OurException("Member not found with ID: " + memberId);
-            }
-            if (membershipPackageService.checkMembershipPackage(memberId)){
-
-            } else{
-
-            }
-
-
-
-        } catch (OurException e) {
-            response.setStatusCode(400);
-            response.setMessage(e.getMessage());
-        } catch (Exception e) {
-            response.setStatusCode(500);
-            response.setMessage("Internal server error: " + e.getMessage());
-        }
+//        try {
+//            // Validate the planDTO fields
+//            Optional<Member> memberOpt = memberRepository.findById(memberId);
+//            if (memberOpt.isEmpty()) {
+//                throw new OurException("Member not found with ID: " + memberId);
+//            }
+//            if (membershipPackageService.checkMembershipPackage(memberId)){
+//
+//            } else{
+//
+//            }
+//
+//
+//
+//        } catch (OurException e) {
+//            response.setStatusCode(400);
+//            response.setMessage(e.getMessage());
+//        } catch (Exception e) {
+//            response.setStatusCode(500);
+//            response.setMessage("Internal server error: " + e.getMessage());
+//        }
         return response;
     }
 

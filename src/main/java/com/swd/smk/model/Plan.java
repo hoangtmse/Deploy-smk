@@ -22,6 +22,10 @@ public class Plan {
 
     private String phases;
 
+    @Lob
+    @Column(name = "plan_details", columnDefinition = "TEXT")
+    private String planDetails;
+
     private LocalDate StartDate;
 
     private LocalDate ExpectedEndDate;

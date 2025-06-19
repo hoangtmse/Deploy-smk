@@ -1,5 +1,6 @@
 package com.swd.smk.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swd.smk.dto.MemberDTO;
 import com.swd.smk.dto.MemberShipPackageDTO;
 import com.swd.smk.dto.AdminDTO;
@@ -26,6 +27,11 @@ import com.swd.smk.model.Post;
 import com.swd.smk.model.Progress;
 import com.swd.smk.model.SmokingLog;
 import com.swd.smk.model.jointable.MemberBadge;
+
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Converter {
@@ -169,9 +175,11 @@ public class Converter {
     public static PlanDTO convertPlanToDTO(Plan model) {
         PlanDTO dto = new PlanDTO();
         dto.setId(model.getId());
+
         if (model.getMember() != null) {
             dto.setMember(convertMemberToDTO(model.getMember()));
         }
+
         dto.setReason(model.getReason());
         dto.setPhases(model.getPhases());
         dto.setStartDate(model.getStartDate());
@@ -179,7 +187,66 @@ public class Converter {
         dto.setStatus(model.getStatus());
         dto.setDateCreated(model.getDateCreated());
         dto.setDateUpdated(model.getDateUpdated());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            String planDetailsJson = model.getPlanDetails();
+            if (planDetailsJson != null && !planDetailsJson.isBlank()) {
+                // Parse toàn bộ planDetails
+                Map<String, Object> detailsMap = objectMapper.readValue(planDetailsJson, Map.class);
+
+                // Trích phần text
+                String text = extractTextFromPlanDetails(detailsMap);
+
+                // Tách phần JSON Schema từ trong text
+                Map<String, Object> planSchema = extractJsonSchema(text);
+                dto.setPlanSchema(planSchema);
+            } else {
+                dto.setPlanDetails(null);
+                dto.setPlanSchema(null);
+            }
+        } catch (Exception e) {
+            dto.setPlanDetails(null);
+            dto.setPlanSchema(null);
+        }
+
         return dto;
+    }
+
+    private static String extractTextFromPlanDetails(Map<String, Object> planDetails) {
+        try {
+            // Điều hướng: candidates[0] → content → parts[0] → text
+            List<Map<String, Object>> candidates = (List<Map<String, Object>>) planDetails.get("candidates");
+            if (candidates != null && !candidates.isEmpty()) {
+                Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+                List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+                if (parts != null && !parts.isEmpty()) {
+                    return (String) parts.get(0).get("text");
+                }
+            }
+        } catch (Exception e) {
+            // log nếu cần
+        }
+        return null;
+    }
+
+    private static Map<String, Object> extractJsonSchema(String fullText) {
+        if (fullText == null) return null;
+
+        try {
+            Pattern pattern = Pattern.compile("```json\\s*(\\{.*?\\})\\s*```", Pattern.DOTALL);
+            Matcher matcher = pattern.matcher(fullText);
+
+            if (matcher.find()) {
+                String jsonString = matcher.group(1);
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.readValue(jsonString, Map.class);
+            }
+        } catch (Exception e) {
+            // log nếu cần
+        }
+        return null;
     }
 
     public static PostDTO convertPostToDTO(Post model) {

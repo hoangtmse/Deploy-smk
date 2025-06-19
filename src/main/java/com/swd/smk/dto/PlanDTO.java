@@ -6,6 +6,7 @@ import com.swd.smk.enums.Status;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -25,4 +26,6 @@ public class PlanDTO {
     private LocalDate dateCreated;
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateUpdated;
+    private Map<String, Object> planDetails;
+    private Map<String, Object> planSchema;
 }

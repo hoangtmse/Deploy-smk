@@ -47,7 +47,7 @@ public class MembershipPackageController {
 
     @PostMapping("/user/buy-membership-package/{id}/member/{memberId}")
     public ResponseEntity<Response> buyMembershipPackage(@PathVariable Long id, @PathVariable Long memberId) {
-        Response response = membershipPackageService.buyMembershipPackage(id, memberId);
+        Response response = membershipPackageService.buyMembershipPackage(memberId, id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

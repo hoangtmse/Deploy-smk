@@ -1,7 +1,6 @@
 package com.swd.smk.controller;
 
 import com.swd.smk.dto.AdminDTO;
-import com.swd.smk.dto.LoginRequest;
 import com.swd.smk.dto.Response;
 import com.swd.smk.services.interfac.IAdminService;
 import org.springframework.beans.factory.annotation.Autowired;

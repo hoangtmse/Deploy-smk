@@ -8,8 +8,6 @@ public interface IPlanService {
 
     Response createPlan(Long memberId, Long smokingLogId);
 
-    Response updatePlan(Long planId, PlanDTO planDTO);
-
     Response deletePlan(Long planId);
 
     Response getPlanById(Long planId);

@@ -24,7 +24,7 @@ public class MembershipPackage {
     private String description;
 
     @OneToMany(mappedBy = "membership_Package")
-    private List<Member> Members;
+    private List<Member> members;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

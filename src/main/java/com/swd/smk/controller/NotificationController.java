@@ -14,7 +14,7 @@ public class NotificationController {
     @Autowired
     private INotificationService notificationService;
 
-    @PostMapping("/public/create-notification/member/{memberId}")
+    @PostMapping("/user/create-notification/member/{memberId}")
     public ResponseEntity<Response> createNotification(@RequestBody NotificationDTO notificationDTO,
                                                        @PathVariable Long memberId) {
         notificationDTO.setMemberId(memberId);
@@ -22,25 +22,25 @@ public class NotificationController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/public/update-notification/{notificationId}")
+    @PutMapping("/user/update-notification/{notificationId}")
     public ResponseEntity<Response> updateNotification(@PathVariable Long notificationId, @RequestBody NotificationDTO notificationDTO) {
         Response response = notificationService.updateNotification(notificationId, notificationDTO);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @DeleteMapping("/public/delete-notification/{notificationId}")
+    @DeleteMapping("/user/delete-notification/{notificationId}")
     public ResponseEntity<Response> deleteNotification(@PathVariable Long notificationId) {
         Response response = notificationService.deleteNotification(notificationId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/public/get-notification/{notificationId}")
+    @GetMapping("/user/get-notification/{notificationId}")
     public ResponseEntity<Response> getNotificationById(@PathVariable Long notificationId) {
         Response response = notificationService.getNotificationById(notificationId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/public/get-all-notifications")
+    @GetMapping("/user/get-all-notifications")
     public ResponseEntity<Response> getAllNotifications() {
         Response response = notificationService.getAllNotifications();
         return ResponseEntity.status(response.getStatusCode()).body(response);

@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 @Service
 public class JWTUtils {
-    private static final long EXPIRATION_TIME = 1800000L; // 30 minutes
+    private static final long EXPIRATION_TIME = 604800000; // 30 minutes
     private final SecretKey Key;
 
     public JWTUtils() {

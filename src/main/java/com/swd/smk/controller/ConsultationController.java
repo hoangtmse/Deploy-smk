@@ -8,13 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/public")
+@RequestMapping("/api")
 public class ConsultationController {
 
     @Autowired
     private IConsultationService consultationService;
 
-    @PostMapping("/create-consultation/coach/{coachId}/member/{memberId}")
+    @PostMapping("/user/create-consultation/coach/{coachId}/member/{memberId}")
     public ResponseEntity<Response> createConsultation(@PathVariable Long coachId,
                                                        @PathVariable Long memberId,
                                                        @RequestBody ConsultationDTO consultationDTO) {
@@ -24,25 +24,25 @@ public class ConsultationController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/update-consultation/{id}")
+    @PutMapping("/user/update-consultation/{id}")
     public ResponseEntity<Response> updateConsultation(@PathVariable Long id, @RequestBody ConsultationDTO consultationDTO) {
         Response response = consultationService.updateConsultation(id, consultationDTO);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @DeleteMapping("/delete-consultation/{id}")
+    @DeleteMapping("/user/delete-consultation/{id}")
     public ResponseEntity<Response> deleteConsultation(@PathVariable Long id) {
         Response response = consultationService.deleteConsultation(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/get-consultation/{id}")
+    @GetMapping("/user/get-consultation/{id}")
     public ResponseEntity<Response> getConsultationById(@PathVariable Long id) {
         Response response = consultationService.getConsultationById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/get-all-consultations")
+    @GetMapping("/user/get-all-consultations")
     public ResponseEntity<Response> getAllConsultations() {
         Response response = consultationService.getAllConsultations();
         return ResponseEntity.status(response.getStatusCode()).body(response);

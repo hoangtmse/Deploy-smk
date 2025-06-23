@@ -39,6 +39,10 @@ public class SecurityConfig {
     private final String[] PUBLIC_LIST = {"/api/public/**"};
     private final String[] USER_LIST = {"/api/user/**"};
     private final String[] SWAGGERUI = {"/swagger-ui/**", "/v3/api-docs/**","/swagger-ui.html"};
+    private final String[] GOOGLE_MEET_LIST = {
+            "/auth-url",
+            "/callback"
+    };
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
@@ -51,6 +55,7 @@ public class SecurityConfig {
                        .requestMatchers(ADMIN_LIST).hasAuthority("ROLE_ADMIN")
                        .requestMatchers(COACH_LIST).hasAnyAuthority("ROLE_COACH", "ROLE_ADMIN")
                        .requestMatchers(MEMBER_LIST).hasAnyAuthority("ROLE_MEMBER", "ROLE_COACH", "ROLE_ADMIN")
+                        .requestMatchers(GOOGLE_MEET_LIST).permitAll()
                         .requestMatchers(USER_LIST).authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

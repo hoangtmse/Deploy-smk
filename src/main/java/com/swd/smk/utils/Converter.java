@@ -137,6 +137,9 @@ public class Converter {
             dto.setCoach(convertCoachToDTO(model.getCoach()));
         }
         dto.setConsultationDate(model.getConsultationDate());
+        dto.setStartDate(model.getStartDate());
+        dto.setEndDate(model.getEndDate());
+        dto.setGoogleMeetLink(model.getGoogleMeetLink());
         dto.setNotes(model.getNotes());
         dto.setStatus(model.getStatus());
         dto.setDateCreated(model.getDateCreated());

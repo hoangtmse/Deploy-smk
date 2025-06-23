@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,6 +20,11 @@ public class ConsultationDTO {
     private Long coachId;
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime consultationDate;
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private Date startDate;
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private Date endDate;
+    private String googleMeetLink;
     private String notes;
     private Status status;
     @JsonFormat(pattern = "dd-MM-yyyy")

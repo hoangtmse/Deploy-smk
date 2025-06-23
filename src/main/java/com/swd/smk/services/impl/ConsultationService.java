@@ -1,5 +1,7 @@
 package com.swd.smk.services.impl;
 
+import com.swd.smk.config.GoogleMeetService;
+import com.swd.smk.config.MailService;
 import com.swd.smk.dto.ConsultationDTO;
 import com.swd.smk.dto.Response;
 import com.swd.smk.enums.Status;
@@ -11,6 +13,7 @@ import com.swd.smk.repository.ConsultationRepository;
 import com.swd.smk.repository.MemberRepository;
 import com.swd.smk.services.interfac.IConsultationService;
 import com.swd.smk.utils.Converter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ConsultationService implements IConsultationService {
 
     @Autowired
@@ -27,8 +31,15 @@ public class ConsultationService implements IConsultationService {
 
     @Autowired
     private CoachRepository coachRepository;
+
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private GoogleMeetService googleMeetService;
+
+    @Autowired
+    private MailService mailService;
 
     @Override
     public Response createConsultation(ConsultationDTO consultationDTO) {
@@ -58,6 +69,26 @@ public class ConsultationService implements IConsultationService {
 
             consultation.setNotes(consultationDTO.getNotes());
             consultation.setConsultationDate(consultationDTO.getConsultationDate());
+            consultation.setStartDate(consultationDTO.getStartDate());
+            consultation.setEndDate(consultationDTO.getEndDate());
+            if (consultationDTO.getGoogleMeetLink() != null) {
+                consultation.setGoogleMeetLink(consultationDTO.getGoogleMeetLink());
+            } else {
+                // Generate Google Meet link if not provided
+                String meetLink = googleMeetService.createGoogleMeetLink(consultationDTO.getNotes(),consultationDTO.getStartDate(), consultationDTO.getEndDate());
+                consultation.setGoogleMeetLink(meetLink);
+            }
+            mailService.sendSimpleMail(consultation.getMember().getEmail(), " Consultation Created",
+                    "Your consultation with coach " + consultation.getCoach().getName() + " has been created successfully. \n" +
+                            "Consultation Date: " + consultation.getConsultationDate() + "\n" +
+                            "Google Meet Link: " + consultation.getGoogleMeetLink(),
+                            "hoangtmse183217@fpt.edu.vn");
+
+            mailService.sendSimpleMail(consultation.getCoach().getEmail(), " Consultation Created",
+                    "A new consultation has been created with member " + consultation.getMember().getFullName() + ". \n" +
+                            "Consultation Date: " + consultation.getConsultationDate() + "\n" +
+                            "Google Meet Link: " + consultation.getGoogleMeetLink(),
+                            "hoangtmse183217@fpt.edu.vn") ;
             consultation.setStatus(Status.ACTIVE);
             consultation.setDateCreated(LocalDate.now());
             consultation.setDateUpdated(LocalDate.now());
@@ -70,6 +101,7 @@ public class ConsultationService implements IConsultationService {
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Internal server error: " + e.getMessage());
+            log.error("Error creating consultation: ", e);
         }
         return response;
     }

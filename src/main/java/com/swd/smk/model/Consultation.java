@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "consultation")
@@ -25,6 +26,15 @@ public class Consultation {
 
     @Column(name = "Consultation_Date")
     private LocalDateTime consultationDate;
+
+    @Column(name = "Start_Date_Time")
+    private Date startDate;
+
+    @Column(name = "End_Date_Time")
+    private Date endDate;
+
+    @Column(name = "Google_Meet_Link")
+    private String googleMeetLink;
 
     @Column(columnDefinition = "TEXT")
     private String notes;

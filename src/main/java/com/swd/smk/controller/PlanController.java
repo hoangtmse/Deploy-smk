@@ -19,7 +19,7 @@ public class PlanController {
 
     @PostMapping("/user/create-plan/member/{memberId}/smoking-log/{smokingLogId}")
     public ResponseEntity<Response>  createPlan(@PathVariable Long smokingLogId, @PathVariable Long memberId) {
-      Response response = planService.createPlan(smokingLogId, memberId);
+      Response response = planService.createPlan(memberId, smokingLogId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

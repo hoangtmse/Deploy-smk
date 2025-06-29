@@ -1,5 +1,7 @@
 package com.swd.smk.services.impl;
 
+import com.swd.smk.config.VnpayConfig;
+import com.swd.smk.config.VnpayProperties;
 import com.swd.smk.dto.MemberShipPackageDTO;
 import com.swd.smk.dto.Response;
 import com.swd.smk.enums.Status;
@@ -10,12 +12,15 @@ import com.swd.smk.repository.MemberRepository;
 import com.swd.smk.repository.MembershipPackageRepository;
 import com.swd.smk.services.interfac.IMembershipPackage;
 import com.swd.smk.utils.Converter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class MembershipPackageService implements IMembershipPackage {
@@ -25,6 +30,12 @@ public class MembershipPackageService implements IMembershipPackage {
 
     @Autowired
     MemberRepository memberRepository;
+
+    @Autowired
+    VnpayConfig vnpayConfig;
+
+    @Autowired
+    VnpayProperties vnpayProperties;
 
     @Override
     public Response getMembershipPackageById(Long id) {
@@ -77,28 +88,35 @@ public class MembershipPackageService implements IMembershipPackage {
     @Override
     public Response createMembershipPackage(MemberShipPackageDTO memberShipPackageDTO) {
         Response response = new Response();
-        try{
-            // Validate the input data
+        try {
+            if (memberShipPackageDTO.getPackageName() == null || memberShipPackageDTO.getPackageName().trim().isEmpty()) {
+                throw new OurException("Tên gói không được để trống");
+            }
 
-            // Check if the package name is provided
+            if (memberShipPackageDTO.getPrice() == null || memberShipPackageDTO.getPrice() < 5000.0) {
+                throw new OurException("Giá gói phải từ 5.000 VNĐ trở lên");
+            }
+
+            // Tạo đối tượng MembershipPackage
             MembershipPackage membershipPackage = new MembershipPackage();
-            membershipPackage.setPackageName(memberShipPackageDTO.getPackageName());
+            membershipPackage.setPackageName(memberShipPackageDTO.getPackageName().trim());
             membershipPackage.setPrice(memberShipPackageDTO.getPrice());
             membershipPackage.setStatus(Status.ACTIVE);
             membershipPackage.setDescription(memberShipPackageDTO.getDescription());
             membershipPackage.setDateUpdated(LocalDate.now());
             membershipPackage.setDateCreated(LocalDate.now());
-            membershipPackageRepository.save(membershipPackage);
-            response.setStatusCode(200);
-            response.setMessage("Membership package created successfully");
-            response.setMembership_Package(Converter.convertMemberShipPackageDTO(membershipPackage));
 
+            membershipPackageRepository.save(membershipPackage);
+
+            response.setStatusCode(200);
+            response.setMessage("Tạo gói thành viên thành công");
+            response.setMembership_Package(Converter.convertMemberShipPackageDTO(membershipPackage));
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Internal server error: " + e.getMessage());
+            response.setMessage("Lỗi máy chủ: " + e.getMessage());
         }
         return response;
     }
@@ -160,30 +178,81 @@ public class MembershipPackageService implements IMembershipPackage {
     }
 
     @Override
-    public Response buyMembershipPackage(Long memberId, Long packageId) {
+    public Response buyMembershipPackage(Long memberId, Long packageId, HttpServletRequest request) {
         Response response = new Response();
         try {
-            // Kiểm tra member và package tồn tại
+            // 1. Kiểm tra tồn tại
             Optional<MembershipPackage> packageOpt = membershipPackageRepository.findById(packageId);
-            if (packageOpt.isEmpty()) {
-                throw new OurException("Membership package not found");
-            }
             Optional<Member> memberOpt = memberRepository.findById(memberId);
-            if (memberOpt.isEmpty()) {
-                throw new OurException("Member not found");
-            }
-            // Thực hiện logic mua gói (tạo bản ghi purchase, cập nhật trạng thái, ...)
+            if (packageOpt.isEmpty()) throw new OurException("Membership package not found");
+            if (memberOpt.isEmpty()) throw new OurException("Member not found");
+
             MembershipPackage membershipPackage = packageOpt.get();
             Member member = memberOpt.get();
-            // Giả sử chúng ta có một phương thức để xử lý việc mua gói
-            member.setMembership_Package(membershipPackage);
-            memberRepository.save(member);
 
+            // 2. Sinh txnRef và lưu tạm nếu cần
+            String vnp_TxnRef = VnpayConfig.getRandomNumber(8);
+            long amount = (long) (membershipPackage.getPrice() * 100); // nhân 100 theo yêu cầu VNPAY
+            String vnp_TmnCode = vnpayProperties.getTmnCode();
+            String vnp_IpAddr = VnpayConfig.getIpAddress(request);
+
+            // 3. Sinh URL thanh toán
+            Map<String, String> vnp_Params = new HashMap<>();
+            vnp_Params.put("vnp_Version", VnpayConfig.vnp_Version);
+            vnp_Params.put("vnp_Command", VnpayConfig.vnp_Command);
+            vnp_Params.put("vnp_TmnCode", vnpayProperties.getTmnCode());
+            vnp_Params.put("vnp_Amount", String.valueOf(amount));
+            vnp_Params.put("vnp_CurrCode", "VND");
+            vnp_Params.put("vnp_OrderInfo", "Nap tien goi " + membershipPackage.getPackageName());
+            vnp_Params.put("vnp_OrderType", "other");
+            vnp_Params.put("vnp_BankCode", "VNBANK"); // hoặc bỏ nếu không chọn sẵn ngân hàng
+            vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.put("vnp_Locale", "vn");
+            vnp_Params.put("vnp_ReturnUrl", vnpayProperties.getReturnUrl() + "?memberId=" + memberId + "&packageId=" + packageId);
+            vnp_Params.put("vnp_IpAddr", vnp_IpAddr); // Thay thế bằng IP thực tế nếu cần
+
+            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            String vnp_CreateDate = formatter.format(cld.getTime());
+            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+            cld.add(Calendar.MINUTE, 15);
+            String vnp_ExpireDate = formatter.format(cld.getTime());
+            vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+            // Build query and hash
+            List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+            Collections.sort(fieldNames);
+
+            StringBuilder hashData = new StringBuilder();
+            StringBuilder query = new StringBuilder();
+
+            for (int i = 0; i < fieldNames.size(); i++) {
+                String fieldName = fieldNames.get(i);
+                String fieldValue = vnp_Params.get(fieldName);
+
+                hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8))
+                        .append('=')
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8));
+
+                if (i != fieldNames.size() - 1) {
+                    hashData.append('&');
+                    query.append('&');
+                }
+            }
+
+            String vnp_SecureHash = VnpayConfig.hmacSHA512(vnpayProperties.getHashSecret(), hashData.toString());
+            query.append("&vnp_SecureHash=").append(vnp_SecureHash);
+
+            String paymentUrl = VnpayConfig.vnp_PayUrl + "?" + query;
+            response.setMessage("Payment URL generated successfully");
             response.setStatusCode(200);
-            response.setMessage("Membership package purchased successfully");
+            response.setToken(paymentUrl);
+
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Internal server error: " + e.getMessage());
+            response.setMessage("Error: " + e.getMessage());
         }
         return response;
     }

@@ -13,5 +13,7 @@ public interface IPlanService {
     Response getPlanById(Long planId);
 
     Response getAllPlans();
+
+    Response getPlansByMemberId(Long memberId);
 }
 

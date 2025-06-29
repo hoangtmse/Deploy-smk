@@ -39,4 +39,10 @@ public class PlanController {
         Response response = planService.getAllPlans();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("/user/get-plans-by-member/{memberId}")
+    public ResponseEntity<Response> getPlansByMemberId(@PathVariable Long memberId) {
+        Response response = planService.getPlansByMemberId(memberId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

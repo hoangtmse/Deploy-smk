@@ -148,6 +148,18 @@
 			<version>1.41.7</version> <!-- hoặc 1.34.2 nếu dùng các version cũ -->
 		</dependency>
 
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>1.33.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.15</version>
+		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>

@@ -139,4 +139,33 @@ public class BadgeService implements IBadgeService {
         }
         return response;
     }
+
+    @Override
+    public Response updateBadgeImage(Long badgeId, String imageUrl) {
+        Response response = new Response();
+        try {
+            Badge badge = badgeRepository.findById(badgeId)
+                    .orElseThrow(() -> new OurException("Badge not found"));
+
+            if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                throw new OurException("Image URL is required");
+            }
+
+            badge.setImageUrl(imageUrl);
+            badge.setDateUpdated(LocalDate.now());
+            badgeRepository.save(badge);
+
+            response.setStatusCode(200);
+            response.setMessage("Badge image updated successfully");
+            response.setBadge(Converter.convertBadgeToDTO(badge));
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
+
 }

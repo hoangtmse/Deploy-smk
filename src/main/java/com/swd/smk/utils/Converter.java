@@ -101,6 +101,7 @@ public class Converter {
         BadgeDTO dto = new BadgeDTO();
         dto.setId(model.getId());
         dto.setBadgeName(model.getBadgeName());
+        dto.setImageUrl(model.getImageUrl());
         dto.setDescription(model.getDescription());
         dto.setDateCreated(model.getDateCreated());
         dto.setDateUpdated(model.getDateUpdated());

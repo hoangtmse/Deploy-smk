@@ -2,11 +2,16 @@ package com.swd.smk.controller;
 
 import com.swd.smk.dto.MemberShipPackageDTO;
 import com.swd.smk.dto.Response;
+import com.swd.smk.exception.OurException;
 import com.swd.smk.model.MembershipPackage;
+import com.swd.smk.repository.MembershipPackageRepository;
 import com.swd.smk.services.interfac.IMembershipPackage;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -14,6 +19,9 @@ public class MembershipPackageController {
 
     @Autowired
     private IMembershipPackage membershipPackageService;
+
+    @Autowired
+    private MembershipPackageRepository membershipPackageRepository;
 
     @GetMapping("/user/get-membership-package-by-id/{id}")
     public ResponseEntity<Response> getMembershipPackageById(@PathVariable Long id) {
@@ -46,8 +54,10 @@ public class MembershipPackageController {
     }
 
     @PostMapping("/user/buy-membership-package/{id}/member/{memberId}")
-    public ResponseEntity<Response> buyMembershipPackage(@PathVariable Long id, @PathVariable Long memberId) {
-        Response response = membershipPackageService.buyMembershipPackage(memberId, id);
+    public ResponseEntity<Response> buyMembershipPackage(@PathVariable Long id, @PathVariable Long memberId, HttpServletRequest request) {
+        Response response = membershipPackageService.buyMembershipPackage(memberId, id, request);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+
 }

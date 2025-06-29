@@ -24,6 +24,9 @@ public class Badge {
 
     private String description;
 
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
     @Column(name = "Date_Created")
     private LocalDate dateCreated;
 

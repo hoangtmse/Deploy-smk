@@ -15,6 +15,7 @@ public class BadgeDTO {
     private Long id;
     private String badgeName;
     private String description;
+    private String imageUrl;
     private List<MemberBadgeDTO> memberBadges;
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateCreated;

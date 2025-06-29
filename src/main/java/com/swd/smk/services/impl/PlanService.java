@@ -283,5 +283,30 @@ public class PlanService implements IPlanService {
         }
         return response;
     }
+
+    @Override
+    public Response getPlansByMemberId(Long memberId) {
+        Response response = new Response();
+        try {
+            Optional<Member> memberOpt = memberRepository.findById(memberId);
+            if (memberOpt.isEmpty()) {
+                throw new OurException("Member not found with ID: " + memberId);
+            }
+            List<Plan> plans = planRepository.findByMemberId(memberId);
+            List<PlanDTO> planDTOs = plans.stream()
+                    .map(Converter::convertPlanToDTO)
+                    .collect(Collectors.toList());
+            response.setStatusCode(200);
+            response.setMessage("Plans for member retrieved successfully");
+            response.setPlans(planDTOs);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
 }
 

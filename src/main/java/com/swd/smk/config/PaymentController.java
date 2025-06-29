@@ -41,7 +41,7 @@ public class PaymentController {
         long amount = 1000000; // 10,000 VND
 
         String vnp_TxnRef = VnpayConfig.getRandomNumber(8);
-        String vnp_TmnCode = vnpayConfig.vnp_TmnCode;
+        String vnp_TmnCode = vnpayProperties.getTmnCode();
         String vnp_IpAddr = VnpayConfig.getIpAddress(request);
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -89,7 +89,7 @@ public class PaymentController {
             }
         }
 
-        String vnp_SecureHash = VnpayConfig.hmacSHA512(vnpayConfig.secretKey, hashData.toString());
+        String vnp_SecureHash = VnpayConfig.hmacSHA512(vnpayProperties.getHashSecret(), hashData.toString());
         query.append("&vnp_SecureHash=").append(vnp_SecureHash);
 
         String paymentUrl = VnpayConfig.vnp_PayUrl + "?" + query;

@@ -44,7 +44,8 @@ public class SmokingLogService implements ISmokingLog {
             smokingLogRepository.save(smokingLog);
             response.setStatusCode(200);
             response.setMessage("Smoking log created successfully.");
-            response.setSmokingLog(smokingLogDTO);
+            SmokingLogDTO createdSmokingLogDTO = Converter.convertSmokingLogToDTO(smokingLog);
+            response.setSmokingLog(createdSmokingLogDTO);
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

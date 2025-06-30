@@ -47,4 +47,16 @@ public class ConsultationController {
         Response response = consultationService.getAllConsultations();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("/user/get-consultations-by-member/{memberId}")
+    public ResponseEntity<Response> getConsultationsByMemberId(@PathVariable Long memberId) {
+        Response response = consultationService.getConsultationsByMemberId(memberId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/user/get-consultations-by-coach/{coachId}")
+    public ResponseEntity<Response> getConsultationsByCoachId(@PathVariable Long coachId) {
+        Response response = consultationService.getConsultationsByCoachId(coachId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

@@ -14,5 +14,6 @@ public interface IProgressService {
     Response getProgressById(Long progressId);
 
     Response getAllProgresses();
-    Response getProgressesByMemberId(Long memberId);
+
+    Response getProgressesByMemberIdAndStatus(Long memberId);
 }

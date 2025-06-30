@@ -226,4 +226,32 @@ public class ConsultationService implements IConsultationService {
         }
         return response;
     }
+
+    @Override
+    public Response getConsultationsByCoachId(Long coachId) {
+        Response response = new Response();
+        try {
+            if (!coachRepository.existsById(coachId)) {
+                throw new OurException("Coach not found with ID: " + coachId);
+            }
+            List<Consultation> consultations = consultationRepository.findByCoachIdAndStatus(coachId, Status.ACTIVE);
+            if (consultations.isEmpty()) {
+                throw new OurException("No consultations found for coach with ID: " + coachId);
+            }
+            List<ConsultationDTO> consultationDTOs = consultations.stream()
+                    .map(Converter::convertConsultationToDTO)
+                    .collect(Collectors.toList());
+
+            response.setStatusCode(200);
+            response.setMessage("Consultations retrieved successfully");
+            response.setConsultations(consultationDTOs);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
 }

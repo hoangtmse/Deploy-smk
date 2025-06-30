@@ -44,6 +44,8 @@ public class MemberService implements IMemberService {
     private FeedbackRepository feedbackRepository;
     @Autowired
     private ConsultationRepository consultationRepository;
+    @Autowired
+    private ProgressRepository progressRepository;
 
     @Override
     public Response registerMember(MemberDTO memberRequest) {
@@ -127,6 +129,9 @@ public class MemberService implements IMemberService {
                     .stream().map(post -> post.getId().toString()).collect(Collectors.toList()));
             response.setFeedbackIds(feedbackRepository.findByMemberIdAndStatus(member.getId(), Status.ACTIVE)
                     .stream().map(feedback -> feedback.getId().toString()).collect(Collectors.toList()));
+            response.setProgressIds(progressRepository.findByMemberIdAndStatus(member.getId(), Status.ACTIVE)
+                    .stream().map(progress -> progress.getProgressId().toString()).collect(Collectors.toList()));
+
             response.setStatusCode(200);
             response.setExpirationTime("7 Days");
             response.setMessage("successful");

@@ -61,4 +61,6 @@ public class Response {
     private CoachDTO coach;
     private List<CoachDTO> coaches;
 
+    private ProgressLogDTO progressLog;
+
 }

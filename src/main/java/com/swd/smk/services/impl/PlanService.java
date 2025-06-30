@@ -7,11 +7,9 @@ import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
 import com.swd.smk.model.Member;
 import com.swd.smk.model.Plan;
+import com.swd.smk.model.Progress;
 import com.swd.smk.model.SmokingLog;
-import com.swd.smk.repository.MemberRepository;
-import com.swd.smk.repository.MembershipPackageRepository;
-import com.swd.smk.repository.PlanRepository;
-import com.swd.smk.repository.SmokingLogRepository;
+import com.swd.smk.repository.*;
 import com.swd.smk.services.interfac.IMembershipPackage;
 import com.swd.smk.services.interfac.IPlanService;
 import com.swd.smk.services.interfac.ISmokingLog;
@@ -43,6 +41,9 @@ public class PlanService implements IPlanService {
     private IMembershipPackage membershipPackageService;
 
     @Autowired
+    private ProgressRepository progressRepository;
+
+    @Autowired
     private QnAService qnAService;
 
     @Override
@@ -53,6 +54,11 @@ public class PlanService implements IPlanService {
             Optional<Member> memberOpt = memberRepository.findById(memberId);
             if (memberOpt.isEmpty()) {
                 throw new OurException("Member not found with ID: " + memberId);
+            }
+
+            boolean isPlanExists = planRepository.existsByMemberIdAndStatus(memberId, Status.ACTIVE);
+            if (isPlanExists) {
+                throw new OurException("A plan already exists for this member.");
             }
 
             boolean isMembershipPackageExists = membershipPackageRepository.existsByMemberId(memberId);
@@ -125,7 +131,13 @@ public class PlanService implements IPlanService {
             - Smoking frequency: %s
 
             Please provide:
-            1. A 3-month smoking reduction plan, divided into **3 weekly phases**, each lasting 4 weeks. Present weekly goals and strategies using bullet points.
+            1. A 3-month smoking reduction plan, divided into **3 weekly phases**, each lasting 4 weeks.
+            - For each phase, show **weekly goals and strategies** using bullet points.
+            - Additionally, for each week, include a **daily breakdown** (7 days), with:
+            - Day number
+            - Daily goal
+            - Specific task or advice
+            - Motivational tip
             2. At the end of your response, include a **valid JSON Schema** wrapped inside triple backticks (```) and marked with `json`, describing the structure of the plan.
 
             The JSON Schema should include:
@@ -134,6 +146,7 @@ public class PlanService implements IPlanService {
             - Cost per day
             - Frequency
             - An array of 3 phases (each with phase number, week range (4 weeks), goal, and strategies)
+            - An array of day breakdowns for each week (7 days per week)
             - A list of coping mechanisms
             - Notes or disclaimers
 
@@ -185,6 +198,13 @@ public class PlanService implements IPlanService {
             if (planOpt.isEmpty()) {
                 throw new OurException("Plan not found with ID: " + planId);
             }
+            List<Progress> progressList = progressRepository.findByCreatedDateLessThanEqualAndStatus(LocalDate.now(), Status.ACTIVE);
+            for (Progress progress : progressList) {
+                progress.setDateUpdated(LocalDate.now());
+                progress.setStatus(Status.DELETED);
+                progressRepository.save(progress);
+            }
+
             Plan plan = planOpt.get();
             plan.setStatus(Status.DELETED);
             plan.setDateUpdated(LocalDate.now());

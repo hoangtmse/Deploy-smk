@@ -6,6 +6,7 @@ import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
 import com.swd.smk.model.Badge;
 import com.swd.smk.repository.BadgeRepository;
+import com.swd.smk.repository.MemberBadgeRepository;
 import com.swd.smk.services.interfac.IBadgeService;
 import com.swd.smk.utils.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class BadgeService implements IBadgeService {
 
     @Autowired
     private BadgeRepository badgeRepository;
+
+    @Autowired
+    private MemberBadgeRepository memberBadgeRepository;
 
     @Override
     public Response createBadge(BadgeDTO badgeDTO) {
@@ -158,6 +162,30 @@ public class BadgeService implements IBadgeService {
             response.setStatusCode(200);
             response.setMessage("Badge image updated successfully");
             response.setBadge(Converter.convertBadgeToDTO(badge));
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
+
+    @Override
+    public Response getBadgeByMemberId(Long memberId) {
+    Response response = new Response();
+        try {
+            List<Badge> badges = memberBadgeRepository.findBadgesByMemberId(memberId);
+            if (badges.isEmpty()) {
+                throw new OurException("No badges found for member with ID: " + memberId);
+            }
+            List<BadgeDTO> badgeDTOs = badges.stream()
+                    .map(Converter::convertBadgeToDTO)
+                    .collect(Collectors.toList());
+            response.setStatusCode(200);
+            response.setBadges(badgeDTOs);
+            response.setMessage("Badges retrieved successfully for member ID: " + memberId);
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

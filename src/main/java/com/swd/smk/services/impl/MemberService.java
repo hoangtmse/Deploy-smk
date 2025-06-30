@@ -7,7 +7,7 @@ import com.swd.smk.enums.Role;
 import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
 import com.swd.smk.model.Member;
-import com.swd.smk.repository.MemberRepository;
+import com.swd.smk.repository.*;
 import com.swd.smk.services.interfac.IMemberService;
 import com.swd.smk.utils.Converter;
 import com.swd.smk.utils.JWTUtils;
@@ -32,6 +32,18 @@ public class MemberService implements IMemberService {
     private JWTUtils jwtUtils;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private SmokingLogRepository smokingLogRepository;
+    @Autowired
+    private PlanRepository planRepository;
+    @Autowired
+    private PostRepository postService;
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private FeedbackRepository feedbackRepository;
+    @Autowired
+    private ConsultationRepository consultationRepository;
 
     @Override
     public Response registerMember(MemberDTO memberRequest) {
@@ -102,6 +114,20 @@ public class MemberService implements IMemberService {
             response.setStatusCode(200);
             response.setToken(token);
             response.setRole(member.getRole());
+
+            response.setConsultationIds(consultationRepository.findByMemberIdAndStatus(member.getId(), Status.ACTIVE)
+                    .stream().map(consultation -> consultation.getId().toString()).collect(Collectors.toList()));
+            response.setNotificationIds(notificationRepository.findByMemberIdAndStatus(member.getId(), Status.ACTIVE)
+                    .stream().map(notification -> notification.getId().toString()).collect(Collectors.toList()));
+            response.setSmokingLogIds(smokingLogRepository.findByMemberIdAndStatus(member.getId(), Status.ACTIVE)
+                    .stream().map(smokingLog -> smokingLog.getId().toString()).collect(Collectors.toList()));
+            response.setPlanIds(planRepository.findByMemberIdAndStatus(member.getId(), Status.ACTIVE)
+                    .stream().map(plan -> plan.getId().toString()).collect(Collectors.toList()));
+            response.setPostIds(postService.findByMemberIdAndStatus(member.getId(), Status.ACTIVE)
+                    .stream().map(post -> post.getId().toString()).collect(Collectors.toList()));
+            response.setFeedbackIds(feedbackRepository.findByMemberIdAndStatus(member.getId(), Status.ACTIVE)
+                    .stream().map(feedback -> feedback.getId().toString()).collect(Collectors.toList()));
+            response.setStatusCode(200);
             response.setExpirationTime("7 Days");
             response.setMessage("successful");
             response.setMember(Converter.convertMemberToDTO(member));

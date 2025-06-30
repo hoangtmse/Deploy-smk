@@ -11,5 +11,6 @@ public interface INotificationService {
     Response deleteNotification(Long notificationId);
     Response getNotificationById(Long notificationId);
     Response getAllNotifications();
+    Response getNotificationsByMemberId(Long memberId);
 }
 

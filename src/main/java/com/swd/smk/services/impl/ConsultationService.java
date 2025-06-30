@@ -198,4 +198,32 @@ public class ConsultationService implements IConsultationService {
         }
         return response;
     }
+
+    @Override
+    public Response getConsultationsByMemberId(Long memberId) {
+        Response response = new Response();
+        try {
+            if (!memberRepository.existsById(memberId)) {
+                throw new OurException("Member not found with ID: " + memberId);
+            }
+            List<Consultation> consultations = consultationRepository.findByMemberId(memberId);
+            if (consultations.isEmpty()) {
+                throw new OurException("No consultations found for member with ID: " + memberId);
+            }
+            List<ConsultationDTO> consultationDTOs = consultations.stream()
+                    .map(Converter::convertConsultationToDTO)
+                    .collect(Collectors.toList());
+
+            response.setStatusCode(200);
+            response.setMessage("Consultations retrieved successfully");
+            response.setConsultations(consultationDTOs);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
 }

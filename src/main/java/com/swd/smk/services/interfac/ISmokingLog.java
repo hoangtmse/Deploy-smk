@@ -15,4 +15,6 @@ public interface ISmokingLog {
 
     Response getAllSmokingLogs();
 
+    Response getSmokingLogsByMemberId(Long memberId);
+
 }

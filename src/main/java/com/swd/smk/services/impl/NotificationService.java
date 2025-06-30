@@ -158,5 +158,29 @@ public class NotificationService implements INotificationService {
         }
         return response;
     }
+
+    @Override
+    public Response getNotificationsByMemberId(Long memberId) {
+        Response response = new Response();
+        try {
+            List<Notification> notifications = notificationRepository.findByMemberId(memberId);
+            if (notifications.isEmpty()) {
+                throw new OurException("No notifications found for member with ID: " + memberId);
+            }
+            List<NotificationDTO> notificationDTOs = notifications.stream()
+                    .map(Converter::convertNotificationToDTO)
+                    .collect(Collectors.toList());
+            response.setStatusCode(200);
+            response.setMessage("Notifications retrieved successfully");
+            response.setNotifications(notificationDTOs);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
 }
 

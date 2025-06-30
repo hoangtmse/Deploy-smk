@@ -20,6 +20,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -211,14 +214,24 @@ public class MembershipPackageService implements IMembershipPackage {
             vnp_Params.put("vnp_ReturnUrl", vnpayProperties.getReturnUrl() + "?memberId=" + memberId + "&packageId=" + packageId);
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr); // Thay thế bằng IP thực tế nếu cần
 
-            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-            String vnp_CreateDate = formatter.format(cld.getTime());
-            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+//            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+//            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 
-            cld.add(Calendar.MINUTE, 15);
-            String vnp_ExpireDate = formatter.format(cld.getTime());
+            ZoneId vnZoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+            String vnp_CreateDate = LocalDateTime.now(vnZoneId).format(formatter);
+            String vnp_ExpireDate = LocalDateTime.now(vnZoneId).plusMinutes(15).format(formatter);
+
+            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
             vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+//            String vnp_CreateDate = formatter.format(cld.getTime());
+//            vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+//
+//            cld.add(Calendar.MINUTE, 15);
+//            String vnp_ExpireDate = formatter.format(cld.getTime());
+//            vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
             // Build query and hash
             List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
@@ -249,6 +262,10 @@ public class MembershipPackageService implements IMembershipPackage {
             response.setMessage("Payment URL generated successfully");
             response.setStatusCode(200);
             response.setToken(paymentUrl);
+            System.out.println("✅ vnp_CreateDate: " + vnp_CreateDate);
+            System.out.println("✅ vnp_ExpireDate: " + vnp_ExpireDate);
+            System.out.println("✅ vnp_SecureHash: " + vnp_SecureHash);
+            System.out.println("✅ paymentUrl: " + paymentUrl);
 
         } catch (Exception e) {
             response.setStatusCode(500);
@@ -275,5 +292,29 @@ public class MembershipPackageService implements IMembershipPackage {
         }
     }
 
-
+    @Override
+    public Response getMembershipPackageByMemberId(Long memberId) {
+        Response response = new Response();
+        try {
+            Optional<Member> memberOpt = memberRepository.findById(memberId);
+            if (memberOpt.isEmpty()) {
+                throw new OurException("Member not found with ID: " + memberId);
+            }
+            Member member = memberOpt.get();
+            if (member.getMembership_Package() == null || member.getMembership_Package().getStatus() != Status.ACTIVE) {
+                throw new OurException("Member does not have an active membership package");
+            }
+            MembershipPackage membershipPackage = member.getMembership_Package();
+            response.setStatusCode(200);
+            response.setMessage("Membership package retrieved successfully");
+            response.setMembership_Package(Converter.convertMemberShipPackageDTO(membershipPackage));
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
 }

@@ -16,4 +16,6 @@ public interface IBadgeService {
     Response getAllBadges();
 
     Response updateBadgeImage(Long badgeId, String imageUrl);
+
+    Response getBadgeByMemberId(Long memberId);
 }

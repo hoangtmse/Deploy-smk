@@ -174,4 +174,32 @@ public class FeedbackService implements IFeedbackService {
         }
         return response;
     }
+
+    @Override
+    public Response getFeedbackByMemberId(Long memberId) {
+        Response response = new Response();
+        try {
+            Optional<Member> memberOpt = memberRepository.findById(memberId);
+            if (memberOpt.isEmpty()) {
+                throw new OurException("Member not found with ID: " + memberId);
+            }
+            List<Feedback> feedbacks = feedbackRepository.findByMemberId(memberId);
+            if (feedbacks.isEmpty()) {
+                throw new OurException("No feedback found for member with ID: " + memberId);
+            }
+            List<FeedBackDTO> feedbackDTOs = feedbacks.stream()
+                    .map(Converter::convertFeedBackToDTO)
+                    .toList();
+            response.setStatusCode(200);
+            response.setMessage("Feedbacks retrieved successfully");
+            response.setFeedbacks(feedbackDTOs);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
 }

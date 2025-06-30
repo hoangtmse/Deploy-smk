@@ -89,96 +89,60 @@ public class PlanService implements IPlanService {
         int cigarettesPerDay = smokingLog.getCigarettesPerDay();
         double costPerDay = smokingLog.getCost();
         String frequency = smokingLog.getFrequency();
-        Plan plan = new Plan();
         LocalDate today = LocalDate.now();
-        // Categorize smoking levels based on cigarettes per day
+
+        Plan plan = new Plan();
+        plan.setStartDate(today);
+        plan.setExpectedEndDate(today.plusWeeks(12));
+        plan.setDateCreated(today);
+        plan.setDateUpdated(today);
+        plan.setStatus(Status.ACTIVE);
+
+        String phase;
+        String reason;
+        String intro;
+
+        // Gán nội dung mô tả riêng
         if (cigarettesPerDay <= 10 && costPerDay <= 5.0) {
-            plan.setPhases("Light Smoker");
-            plan.setReason("You smoke 5 or fewer cigarettes per day, which is considered a light level.");
-            String suggestion = qnAService
-                    .getAnswer("I have a smoker categorized as a *light smoker* with the following information:\n" +
-                            "- Cigarettes per day: 10\n" +
-                            "- Cost per day: 5.0\n" +
-                            "- Smoking frequency: 4 times per day\n" +
-                            "\n" +
-                            "Please provide:\n" +
-                            "1. A 3-month step-by-step plan to help them reduce smoking, written in bullet points and organized by weekly phases.\n" +
-                            "2. At the end of the response, include a JSON Schema wrapped inside triple backticks with the `json` tag, describing the structure of the plan.\n" +
-                            "\n" +
-                            "The JSON Schema should contain:\n" +
-                            "- Plan name\n" +
-                            "- Initial cigarettes per day\n" +
-                            "- Cost per day\n" +
-                            "- Frequency\n" +
-                            "- An array of 3 phases (each with phase number, week range, goal, and strategies)\n" +
-                            "- A list of coping mechanisms\n" +
-                            "- Notes or disclaimers\n" +
-                            "\n" +
-                            "Only return one candidate. Keep the JSON schema clean and valid.");
-            plan.setPlanDetails(suggestion);
-            plan.setStartDate(today);
-            plan.setExpectedEndDate(today.plusMonths(3));
-            plan.setDateCreated(today);
-            plan.setStatus(Status.ACTIVE);
-            plan.setDateUpdated(today);
+            phase = "Light Smoker";
+            reason = "You smoke 5 or fewer cigarettes per day, which is considered a light level.";
+            intro = "*light smoker*";
         } else if (cigarettesPerDay <= 20 && costPerDay <= 10.0) {
-            plan.setPhases("Moderate Smoker");
-            plan.setReason("You smoke between 6 to 20 cigarettes per day, which is considered a moderate level.");
-            String suggestion = qnAService
-                    .getAnswer("I have a smoker categorized as a *moderate smoker* with the following information:\n" +
-                            "- Cigarettes per day: 15\n" +
-                            "- Cost per day: 7.0\n" +
-                            "- Smoking frequency: 5 times per day\n" +
-                            "\n" +
-                            "Please provide:\n" +
-                            "1. A 3-month personalized plan to help them reduce cigarette use, structured in weekly phases and using bullet points.\n" +
-                            "2. Include a JSON Schema at the end of the response, wrapped in triple backticks and marked as `json`.\n" +
-                            "\n" +
-                            "The JSON Schema must include:\n" +
-                            "- Plan name\n" +
-                            "- Initial cigarettes per day\n" +
-                            "- Cost per day\n" +
-                            "- Frequency\n" +
-                            "- A list of 3 phases (each with phase number, weeks, goal, and strategies)\n" +
-                            "- Coping mechanisms\n" +
-                            "- Final notes or warnings\n" +
-                            "\n" +
-                            "Make sure the JSON schema is well-formed and parsable.");
-            plan.setPlanDetails(suggestion);
-            plan.setStartDate(today);
-            plan.setExpectedEndDate(today.plusMonths(3));
-            plan.setDateCreated(today);
-            plan.setStatus(Status.ACTIVE);
-            plan.setDateUpdated(today);
+            phase = "Moderate Smoker";
+            reason = "You smoke between 6 to 20 cigarettes per day, which is considered a moderate level.";
+            intro = "*moderate smoker*";
         } else {
-            plan.setPhases("Heavy Smoker");
-            plan.setReason("You smoke more than 20 cigarettes per day, which is considered a heavy level.");
-            String suggestion = qnAService
-                    .getAnswer("I have a smoker categorized as a *heavy smoker* with the following profile:\n" +
-                            "- Cigarettes per day: 25\n" +
-                            "- Cost per day: 12.0\n" +
-                            "- Smoking frequency: 6 times per day\n" +
-                            "\n" +
-                            "Please generate:\n" +
-                            "1. A 12-week smoking cessation plan broken down by phase, showing weekly goals and strategies to reduce and eventually quit smoking. Use bullet points for readability.\n" +
-                            "2. Append a valid JSON Schema at the end of your response (enclosed within triple backticks and `json`), which includes:\n" +
-                            "\n" +
-                            "- Name of the plan\n" +
-                            "- Starting cigarette count\n" +
-                            "- Cost per day\n" +
-                            "- Smoking frequency\n" +
-                            "- A list of phases (3 or more), each with phase number, time period, reduction goal, and actions\n" +
-                            "- Coping mechanisms\n" +
-                            "- Warnings or notes\n" +
-                            "\n" +
-                            "Only output one candidate and make sure the schema is JSON-valid for programmatic parsing.");
-            plan.setPlanDetails(suggestion);
-            plan.setStartDate(today);
-            plan.setExpectedEndDate(today.plusMonths(3));
-            plan.setDateCreated(today);
-            plan.setStatus(Status.ACTIVE);
-            plan.setDateUpdated(today);
+            phase = "Heavy Smoker";
+            reason = "You smoke more than 20 cigarettes per day, which is considered a heavy level.";
+            intro = "*heavy smoker*";
         }
+
+        // Nội dung prompt chung cho tất cả các loại
+        String prompt = String.format("""
+            I have a smoker categorized as a %s with the following information:
+            - Cigarettes per day: %d
+            - Cost per day: %.1f
+            - Smoking frequency: %s
+
+            Please provide:
+            1. A 3-month smoking reduction plan, divided into **3 weekly phases**, each lasting 4 weeks. Present weekly goals and strategies using bullet points.
+            2. At the end of your response, include a **valid JSON Schema** wrapped inside triple backticks (```) and marked with `json`, describing the structure of the plan.
+
+            The JSON Schema should include:
+            - Plan name
+            - Initial cigarettes per day
+            - Cost per day
+            - Frequency
+            - An array of 3 phases (each with phase number, week range (4 weeks), goal, and strategies)
+            - A list of coping mechanisms
+            - Notes or disclaimers
+
+            Only return one candidate. Make sure the JSON schema is clean and valid for parsing.
+            """, intro, cigarettesPerDay, costPerDay, frequency);
+
+        plan.setPhases(phase);
+        plan.setReason(reason);
+        plan.setPlanDetails(qnAService.getAnswer(prompt));
 
         return plan;
     }

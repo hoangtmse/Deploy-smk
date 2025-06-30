@@ -10,4 +10,5 @@ public interface IConsultationService {
     Response getConsultationById(Long id);
     Response getAllConsultations();
     Response getConsultationsByMemberId(Long memberId);
+    Response getConsultationsByCoachId(Long coachId);
 }

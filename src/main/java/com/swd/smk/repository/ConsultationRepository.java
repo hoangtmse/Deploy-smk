@@ -13,4 +13,6 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
     List<Consultation> findByMemberId(Long memberId);
 
     List<Consultation> findByMemberIdAndStatus(Long memberId, Status status);
+
+    List<Consultation> findByCoachIdAndStatus(Long coachId, Status status);
 }

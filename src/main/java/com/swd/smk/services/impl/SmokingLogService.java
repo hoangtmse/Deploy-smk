@@ -5,8 +5,10 @@ import com.swd.smk.dto.SmokingLogDTO;
 import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
 import com.swd.smk.model.Member;
+import com.swd.smk.model.Plan;
 import com.swd.smk.model.SmokingLog;
 import com.swd.smk.repository.MemberRepository;
+import com.swd.smk.repository.PlanRepository;
 import com.swd.smk.repository.SmokingLogRepository;
 import com.swd.smk.services.interfac.ISmokingLog;
 import com.swd.smk.utils.Converter;
@@ -23,6 +25,8 @@ public class SmokingLogService implements ISmokingLog {
     private SmokingLogRepository smokingLogRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private PlanRepository planRepository;
     @Override
     public Response createSmokingLog(SmokingLogDTO smokingLogDTO) {
         Response response = new Response();
@@ -30,6 +34,11 @@ public class SmokingLogService implements ISmokingLog {
             Optional<Member> memberOptional = memberRepository.findById(smokingLogDTO.getMemberId());
             if (memberOptional.isEmpty()) {
                 throw new OurException("Member not found with ID: " + smokingLogDTO.getMemberId());
+            }
+            boolean exists = smokingLogRepository.existsByMemberIdAndStatus(
+                    smokingLogDTO.getMemberId(), Status.ACTIVE);
+            if (exists) {
+                throw new OurException("Active smoking log already exists for member with ID: " + smokingLogDTO.getMemberId());
             }
             SmokingLog smokingLog = new SmokingLog();
             smokingLog.setMember(memberOptional.get());
@@ -98,6 +107,13 @@ public class SmokingLogService implements ISmokingLog {
             if (!smokingLogOptional.isPresent()) {
                 throw new OurException("Smoking log not found with ID: " + smokingLogId);
             }
+            List<Plan> plans = planRepository.findByCreatedDateLessThanEqualAndStatus(LocalDate.now(), Status.ACTIVE);
+            for (Plan plan : plans) {
+                plan.setDateUpdated(LocalDate.now());
+                plan.setStatus(Status.DELETED);
+                planRepository.save(plan);
+            }
+
             SmokingLog smokingLog = smokingLogOptional.get();
             smokingLog.setStatus(Status.DELETED);
             smokingLog.setDateUpdated(LocalDate.now());

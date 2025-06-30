@@ -14,7 +14,7 @@ public class ProgressController {
     @Autowired
     private IProgressService progressService;
 
-    @PostMapping("/public/create-progress/member/{memberId}")
+    @PostMapping("/user/create-progress/member/{memberId}")
     public ResponseEntity<Response> createProgress(@RequestBody ProgressDTO progressDTO, @PathVariable Long memberId) {
         Response response = new Response();
         progressDTO.setMemberId(memberId);
@@ -22,27 +22,33 @@ public class ProgressController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/public/update-progress/{progressId}")
+    @PutMapping("/user/update-progress/{progressId}")
     public ResponseEntity<Response> updateProgress(@PathVariable Long progressId, @RequestBody ProgressDTO progressDTO) {
         Response response = progressService.updateProgress(progressId, progressDTO);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @DeleteMapping("/public/delete-progress/{progressId}")
+    @DeleteMapping("/user/delete-progress/{progressId}")
     public ResponseEntity<Response> deleteProgress(@PathVariable Long progressId) {
         Response response = progressService.deleteProgress(progressId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/public/get-progress/{progressId}")
+    @GetMapping("/user/get-progress/{progressId}")
     public ResponseEntity<Response> getProgressById(@PathVariable Long progressId) {
         Response response = progressService.getProgressById(progressId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/public/get-all-progresses")
+    @GetMapping("/admin/get-all-progresses")
     public ResponseEntity<Response> getAllProgresses() {
         Response response = progressService.getAllProgresses();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/user/get-progresses-by-member/{memberId}")
+    public ResponseEntity<Response> getProgressesByMemberId(@PathVariable Long memberId) {
+        Response response = progressService.getProgressesByMemberIdAndStatus(memberId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

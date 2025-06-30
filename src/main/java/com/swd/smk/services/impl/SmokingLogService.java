@@ -163,5 +163,34 @@ public class SmokingLogService implements ISmokingLog {
         return response;
     }
 
+    @Override
+    public Response getSmokingLogsByMemberId(Long memberId) {
+        Response response = new Response();
+        try {
+
+            Optional<Member> memberOptional = memberRepository.findById(memberId);
+            if (memberOptional.isEmpty()) {
+                throw new OurException("Member not found with ID: " + memberId);
+            }
+            List<SmokingLog> smokingLogs = smokingLogRepository.findByMemberId(memberId);
+            if (smokingLogs.isEmpty()) {
+                throw new OurException("No smoking logs found for member with ID: " + memberId);
+            }
+            List<SmokingLogDTO> smokingLogDTOs = smokingLogs.stream()
+                    .map(Converter::convertSmokingLogToDTO)
+                    .toList();
+            response.setStatusCode(200);
+            response.setMessage("Smoking logs retrieved successfully.");
+            response.setSmokingLogs(smokingLogDTOs);
+
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
 
 }

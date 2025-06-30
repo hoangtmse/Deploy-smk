@@ -12,4 +12,5 @@ public interface IMembershipPackage {
     Response deleteMembershipPackage(Long id);
     Response buyMembershipPackage(Long id, Long memberId, HttpServletRequest request);
     boolean checkMembershipPackage(Long memberId);
+    Response getMembershipPackageByMemberId(Long memberId);
 }

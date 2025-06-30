@@ -162,4 +162,32 @@ public class ProgressService implements IProgressService {
         }
         return response;
     }
+
+    @Override
+    public Response getProgressesByMemberId(Long memberId) {
+    Response response = new Response();
+        try {
+            Optional<Member> memberOpt = memberRepository.findById(memberId);
+            if (memberOpt.isEmpty()) {
+                throw new OurException("Member not found with ID: " + memberId);
+            }
+            List<Progress> progresses = progressRepository.findByMemberId(memberId);
+            if (progresses.isEmpty()) {
+                throw new OurException("No progresses found for member with ID: " + memberId);
+            }
+            List<ProgressDTO> progressDTOs = progresses.stream()
+                    .map(Converter::convertProgressToDTO)
+                    .toList();
+            response.setStatusCode(200);
+            response.setMessage("Progresses retrieved successfully");
+            response.setProgresses(progressDTOs);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
 }

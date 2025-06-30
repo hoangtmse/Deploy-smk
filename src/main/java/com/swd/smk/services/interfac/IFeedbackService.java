@@ -9,4 +9,5 @@ public interface IFeedbackService {
     Response createFeedback(Long id, FeedBackDTO feedBackDTO);
     Response updateFeedback(Long id  ,FeedBackDTO feedBackDTO);
     Response deleteFeedback(Long id);
+    Response getFeedbackByMemberId(Long memberId);
 }

@@ -9,4 +9,5 @@ public interface IConsultationService {
     Response deleteConsultation(Long id);
     Response getConsultationById(Long id);
     Response getAllConsultations();
+    Response getConsultationsByMemberId(Long memberId);
 }

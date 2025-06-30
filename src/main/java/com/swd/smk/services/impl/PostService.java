@@ -162,4 +162,28 @@ public class PostService implements IPostService {
         return response;
     }
 
+    @Override
+    public Response getPostsByMemberId(Long memberId) {
+        Response response = new Response();
+        try {
+            List<Post> posts = postRepository.findByMemberId(memberId);
+            if (posts.isEmpty()) {
+                throw new OurException("No posts found for member with ID: " + memberId);
+            }
+            List<PostDTO> postDTOs = posts.stream()
+                    .map(Converter::convertPostToDTO)
+                    .toList();
+            response.setPosts(postDTOs);
+            response.setStatusCode(200);
+            response.setMessage("Posts retrieved successfully for member ID: " + memberId);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Internal server error: " + e.getMessage());
+        }
+        return response;
+    }
+
 }

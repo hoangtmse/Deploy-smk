@@ -1,5 +1,6 @@
 package com.swd.smk.repository;
 
+import com.swd.smk.enums.Status;
 import com.swd.smk.model.Plan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,5 +13,8 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     // For example, to find plans by member ID:
     List<Plan> findByMemberId(Long memberId);
+
+    // To find plans by member ID and status:
+    List<Plan> findByMemberIdAndStatus(Long memberId, Status status);
 }
 

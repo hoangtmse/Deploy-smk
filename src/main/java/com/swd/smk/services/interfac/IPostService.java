@@ -9,4 +9,5 @@ public interface IPostService {
     Response deletePost(Long postId);
     Response getPostById(Long postId);
     Response getAllPosts();
+    Response getPostsByMemberId(Long memberId);
 }

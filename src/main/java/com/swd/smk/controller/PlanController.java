@@ -45,4 +45,6 @@ public class PlanController {
         Response response = planService.getPlansByMemberId(memberId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+
 }

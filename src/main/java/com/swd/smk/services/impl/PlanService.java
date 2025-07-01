@@ -276,7 +276,7 @@ public class PlanService implements IPlanService {
             if (memberOpt.isEmpty()) {
                 throw new OurException("Member not found with ID: " + memberId);
             }
-            List<Plan> plans = planRepository.findByMemberId(memberId);
+            List<Plan> plans = planRepository.findByMemberIdAndStatus(memberId, Status.ACTIVE);
             List<PlanDTO> planDTOs = plans.stream()
                     .map(Converter::convertPlanToDTO)
                     .collect(Collectors.toList());

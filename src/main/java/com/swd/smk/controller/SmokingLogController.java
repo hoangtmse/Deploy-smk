@@ -47,4 +47,10 @@ public class SmokingLogController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @GetMapping("/user/get-smoking-logs-by-member/{memberId}")
+    public ResponseEntity<Response> getSmokingLogsByMemberId(@PathVariable Long memberId) {
+        Response response = smokingLogService.getSmokingLogsByMemberId(memberId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
 }

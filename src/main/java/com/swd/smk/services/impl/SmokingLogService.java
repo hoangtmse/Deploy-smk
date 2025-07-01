@@ -188,7 +188,7 @@ public class SmokingLogService implements ISmokingLog {
             if (memberOptional.isEmpty()) {
                 throw new OurException("Member not found with ID: " + memberId);
             }
-            List<SmokingLog> smokingLogs = smokingLogRepository.findByMemberId(memberId);
+            List<SmokingLog> smokingLogs = smokingLogRepository.findByMemberIdAndStatus(memberId, Status.ACTIVE);
             if (smokingLogs.isEmpty()) {
                 throw new OurException("No smoking logs found for member with ID: " + memberId);
             }

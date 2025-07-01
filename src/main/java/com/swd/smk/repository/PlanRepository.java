@@ -24,6 +24,8 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     @Query("SELECT p FROM Plan p WHERE p.dateCreated <= :date AND p.status = :status")
     List<Plan> findByCreatedDateLessThanEqualAndStatus(@Param("date") LocalDate date, @Param("status") Status status);
+
+
 }
 
 

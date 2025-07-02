@@ -83,6 +83,7 @@ public class Converter {
         dto.setStatus(model.getStatus());
         dto.setDateCreated(model.getDateCreated());
         dto.setDateUpdated(model.getDateUpdated());
+        dto.setMemberCount(dto.getMembers() != null ? dto.getMembers().size() : 0);
         return dto;
     }
 
@@ -107,6 +108,7 @@ public class Converter {
         dto.setDateUpdated(model.getDateUpdated());
         dto.setStatus(model.getStatus());
         dto.setMemberBadges(convertMemberBadgeListToDTO(model.getMemberBadges()));
+        dto.setMemberCount(model.getMemberBadges() != null ? model.getMemberBadges().size() : 0);
         return dto;
     }
 

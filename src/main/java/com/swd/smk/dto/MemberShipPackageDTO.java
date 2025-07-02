@@ -22,4 +22,5 @@ public class MemberShipPackageDTO {
     private LocalDate dateCreated;
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateUpdated;
+    private int memberCount;
 }

@@ -7,6 +7,7 @@ import com.swd.smk.exception.OurException;
 import com.swd.smk.model.Badge;
 import com.swd.smk.repository.BadgeRepository;
 import com.swd.smk.repository.MemberBadgeRepository;
+import com.swd.smk.repository.MemberRepository;
 import com.swd.smk.services.interfac.IBadgeService;
 import com.swd.smk.utils.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class BadgeService implements IBadgeService {
 
     @Autowired
     private MemberBadgeRepository memberBadgeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Override
     public Response createBadge(BadgeDTO badgeDTO) {
@@ -134,6 +138,7 @@ public class BadgeService implements IBadgeService {
             List<BadgeDTO> dtos = badges.stream()
                     .map(Converter::convertBadgeToDTO)
                     .collect(Collectors.toList());
+
             response.setStatusCode(200);
             response.setBadges(dtos);
             response.setMessage("Fetched all badges");
@@ -195,5 +200,7 @@ public class BadgeService implements IBadgeService {
         }
         return response;
     }
+
+
 
 }

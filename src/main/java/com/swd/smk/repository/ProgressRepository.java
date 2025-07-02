@@ -19,4 +19,10 @@ public interface ProgressRepository extends JpaRepository<Progress, Long> {
 
     @Query("SELECT p FROM Progress p WHERE p.dateCreated <= :date AND p.status = :status")
     List<Progress> findByCreatedDateLessThanEqualAndStatus(@Param("date") LocalDate date, @Param("status") Status status);
+
+    long countByMemberIdAndStatus(Long id, Status status);
+
+    long countByMemberIdAndStatusAndHealthImprovementIgnoreCase(Long id, Status status, String normal);
+
+    List<Progress> findAllByMemberIdAndStatusOrderByDateCreatedAsc(Long id, Status status);
 }

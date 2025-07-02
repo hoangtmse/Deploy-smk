@@ -65,4 +65,10 @@ public class BadgeController {
             return ResponseEntity.status(500).body(error);
         }
     }
+
+    @GetMapping("/user/get-badge-by-member/{memberId}")
+    public ResponseEntity<Response> getBadgeByMemberId(@PathVariable Long memberId) {
+        Response response = badgeService.getBadgeByMemberId(memberId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

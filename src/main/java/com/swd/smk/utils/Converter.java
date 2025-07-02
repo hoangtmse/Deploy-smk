@@ -41,16 +41,11 @@ public class Converter {
         MemberBadgeDTO dto = new MemberBadgeDTO();
         dto.setId(model.getId());
         dto.setMember(convertMemberToDTO(model.getMember()));
-        dto.setBadge(null); // Tránh vòng lặp vô hạn, chỉ set nếu cần
+        dto.setBadge(convertBadgeToDTO(model.getBadge())); // Tránh vòng lặp vô hạn, chỉ set nếu cần
         dto.setBadgeName(model.getBadge().getBadgeName());
         dto.setDescription(model.getBadge().getDescription());
         dto.setDateEarned(model.getEarnedDate() != null ? model.getEarnedDate().toString() : null);
         return dto;
-    }
-
-    public static java.util.List<MemberBadgeDTO> convertMemberBadgeListToDTO(java.util.List<MemberBadge> list) {
-        if (list == null) return null;
-        return list.stream().map(Converter::convertMemberBadgeToDTO).collect(Collectors.toList());
     }
 
     public static MemberDTO convertMemberToDTO(Member model){
@@ -68,7 +63,6 @@ public class Converter {
         if (model.getMembership_Package() != null) {
             dto.setMembership_Package(convertMemberShipPackageDTO(model.getMembership_Package()));
         }
-        dto.setMemberBadges(convertMemberBadgeListToDTO(model.getMemberBadges()));
         dto.setDateCreated(model.getDateCreated());
         dto.setDateUpdated(model.getDateUpdated());
         return dto;
@@ -83,6 +77,7 @@ public class Converter {
         dto.setStatus(model.getStatus());
         dto.setDateCreated(model.getDateCreated());
         dto.setDateUpdated(model.getDateUpdated());
+        dto.setMemberCount(dto.getMembers() != null ? dto.getMembers().size() : 0);
         return dto;
     }
 
@@ -106,7 +101,6 @@ public class Converter {
         dto.setDateCreated(model.getDateCreated());
         dto.setDateUpdated(model.getDateUpdated());
         dto.setStatus(model.getStatus());
-        dto.setMemberBadges(convertMemberBadgeListToDTO(model.getMemberBadges()));
         return dto;
     }
 

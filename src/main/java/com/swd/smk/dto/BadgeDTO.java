@@ -22,4 +22,5 @@ public class BadgeDTO {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateUpdated;
     private Status status;
+    private int memberCount;
 }

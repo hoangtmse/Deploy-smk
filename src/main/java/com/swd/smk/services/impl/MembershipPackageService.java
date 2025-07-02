@@ -74,6 +74,18 @@ public class MembershipPackageService implements IMembershipPackage {
                     .map(Converter::convertMemberShipPackageDTO)
                     .toList();
 
+            Map<Long, Integer> packageUserCounts = new HashMap<>();
+            for (Member member : memberRepository.findAll()) {
+                MembershipPackage memberPackage = member.getMembership_Package();
+                if (memberPackage != null && memberPackage.getStatus() == Status.ACTIVE) {
+                    packageUserCounts.merge(memberPackage.getId(), 1, Integer::sum);
+                }
+            }
+
+            memberShipPackageDTO.forEach(dto ->
+                    dto.setMemberCount(packageUserCounts.getOrDefault(dto.getId(), 0))
+            );
+
             response.setStatusCode(200);
             response.setMessage("Membership packages retrieved successfully");
             response.setMembership_Packages(memberShipPackageDTO);

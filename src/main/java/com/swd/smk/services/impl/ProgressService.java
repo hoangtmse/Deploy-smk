@@ -5,12 +5,12 @@ import com.swd.smk.dto.ProgressLogDTO;
 import com.swd.smk.dto.Response;
 import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
+import com.swd.smk.model.Badge;
 import com.swd.smk.model.Member;
 import com.swd.smk.model.Progress;
 import com.swd.smk.model.SmokingLog;
-import com.swd.smk.repository.MemberRepository;
-import com.swd.smk.repository.ProgressRepository;
-import com.swd.smk.repository.SmokingLogRepository;
+import com.swd.smk.model.jointable.MemberBadge;
+import com.swd.smk.repository.*;
 import com.swd.smk.services.interfac.IProgressService;
 import com.swd.smk.utils.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +32,11 @@ public class ProgressService implements IProgressService {
     @Autowired
     private SmokingLogRepository smokingLogRepository;
 
+    @Autowired
+    private BadgeRepository badgeRepository;
+
+    @Autowired
+    private MemberBadgeRepository memberBadgeRepository;
     // Implement the methods defined in IProgressService interface
     @Override
     public Response createProgress(ProgressDTO progressDTO) {
@@ -66,6 +71,20 @@ public class ProgressService implements IProgressService {
             response.setStatusCode(200);
             response.setMessage("Progress created successfully");
             response.setProgress(Converter.convertProgressToDTO(progress));
+            // Assign the first step badge if eligible
+            assignFirstStepBadgeIfEligible(memberOpt.get());
+            // Assign the progress enthusiast badge if eligible
+            assignProgressEnthusiastBadgeIfEligible(memberOpt.get());
+            // Assign the consistency badge if eligible
+            assignConsistencyBadgeIfEligible(memberOpt.get());
+            // Assign the budget saver badge if eligible
+            assignBudgetSaverBadgeIfEligible(memberOpt.get());
+            // Assign the health maintainer badge if eligible
+            assignHealthMaintainerBadgeIfEligible(memberOpt.get());
+            // Assign the good health tracker badge if eligible
+            assignGoodHealthTrackerBadgeIfEligible(memberOpt.get());
+            // Assign the bad phase fighter badge if eligible
+            assignBadPhaseFighterBadgeIfEligible(memberOpt.get());
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -238,5 +257,185 @@ public class ProgressService implements IProgressService {
             response.setMessage("Internal server error: " + e.getMessage());
         }
         return response;
+    }
+
+    private void assignFirstStepBadgeIfEligible(Member member) {
+        // Đếm số bản ghi progress của member
+        long progressCount = progressRepository.countByMemberIdAndStatus(member.getId(), Status.ACTIVE);
+
+        // Nếu là bản ghi đầu tiên
+        if (progressCount == 1) {
+            // Kiểm tra đã có badge chưa
+            Optional<Badge> badgeOpt = badgeRepository.findByBadgeNameIgnoreCase("First Step");
+            if (badgeOpt.isPresent()) {
+                Badge badge = badgeOpt.get();
+
+                boolean alreadyHasBadge = memberBadgeRepository
+                        .existsByMemberIdAndBadgeId(member.getId(), badge.getId());
+
+                if (!alreadyHasBadge) {
+                    MemberBadge memberBadge = new MemberBadge();
+                    memberBadge.setMember(member);
+                    memberBadge.setBadge(badge);
+                    memberBadge.setEarnedDate(LocalDate.now());
+                    memberBadge.setStatus(Status.ACTIVE);
+
+                    memberBadgeRepository.save(memberBadge);
+                    System.out.println("First Step badge assigned to member: " + member.getId());
+                }
+            }
+        }
+    }
+    private void assignProgressEnthusiastBadgeIfEligible(Member member) {
+        long progressCount = progressRepository.countByMemberIdAndStatus(member.getId(), Status.ACTIVE);
+
+        if (progressCount >= 30) {
+            Optional<Badge> badgeOpt = badgeRepository.findByBadgeNameIgnoreCase("Progress Enthusiast");
+            if (badgeOpt.isPresent()) {
+                Badge badge = badgeOpt.get();
+                boolean alreadyHasBadge = memberBadgeRepository
+                        .existsByMemberIdAndBadgeId(member.getId(), badge.getId());
+
+                if (!alreadyHasBadge) {
+                    MemberBadge memberBadge = new MemberBadge();
+                    memberBadge.setMember(member);
+                    memberBadge.setBadge(badge);
+                    memberBadge.setEarnedDate(LocalDate.now());
+                    memberBadge.setStatus(Status.ACTIVE);
+
+                    memberBadgeRepository.save(memberBadge);
+                    System.out.println("Progress Enthusiast badge assigned to member: " + member.getId());
+                }
+            }
+        }
+    }
+    private void assignConsistencyBadgeIfEligible(Member member) {
+        List<Progress> progresses = progressRepository
+                .findAllByMemberIdAndStatus(member.getId(), Status.ACTIVE);
+
+        // Lấy danh sách ngày duy nhất, sắp xếp giảm dần
+        Set<LocalDate> progressDates = progresses.stream()
+                .map(Progress::getDateCreated)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<LocalDate> sortedDates = progressDates.stream()
+                .sorted(Comparator.reverseOrder())
+                .toList();
+
+        // Kiểm tra có chuỗi 7 ngày liên tiếp không
+        int consecutiveCount = 1;
+        for (int i = 1; i < sortedDates.size(); i++) {
+            if (sortedDates.get(i).plusDays(1).equals(sortedDates.get(i - 1))) {
+                consecutiveCount++;
+                if (consecutiveCount == 7) {
+                    break;
+                }
+            } else {
+                consecutiveCount = 1;
+            }
+        }
+
+        if (consecutiveCount >= 7) {
+            Optional<Badge> badgeOpt = badgeRepository.findByBadgeNameIgnoreCase("Consistency");
+            if (badgeOpt.isPresent()) {
+                Badge badge = badgeOpt.get();
+                boolean alreadyHasBadge = memberBadgeRepository
+                        .existsByMemberIdAndBadgeId(member.getId(), badge.getId());
+
+                if (!alreadyHasBadge) {
+                    MemberBadge memberBadge = new MemberBadge();
+                    memberBadge.setMember(member);
+                    memberBadge.setBadge(badge);
+                    memberBadge.setEarnedDate(LocalDate.now());
+                    memberBadge.setStatus(Status.ACTIVE);
+
+                    memberBadgeRepository.save(memberBadge);
+                    System.out.println("Consistency badge assigned to member: " + member.getId());
+                }
+            }
+        }
+    }
+    private void assignBudgetSaverBadgeIfEligible(Member member) {
+        List<Progress> progresses = progressRepository
+                .findAllByMemberIdAndStatus(member.getId(), Status.ACTIVE);
+
+        double totalMoneySaved = progresses.stream()
+                .mapToDouble(p -> p.getMoneySaved() != null ? p.getMoneySaved() : 0.0)
+                .sum();
+
+        if (totalMoneySaved >= 100_000) {
+            Optional<Badge> badgeOpt = badgeRepository.findByBadgeNameIgnoreCase("Budget Saver");
+            if (badgeOpt.isPresent()) {
+                Badge badge = badgeOpt.get();
+                boolean alreadyHasBadge = memberBadgeRepository
+                        .existsByMemberIdAndBadgeId(member.getId(), badge.getId());
+
+                if (!alreadyHasBadge) {
+                    MemberBadge memberBadge = new MemberBadge();
+                    memberBadge.setMember(member);
+                    memberBadge.setBadge(badge);
+                    memberBadge.setEarnedDate(LocalDate.now());
+                    memberBadge.setStatus(Status.ACTIVE);
+
+                    memberBadgeRepository.save(memberBadge);
+                    System.out.println("Budget Saver badge assigned to member: " + member.getId());
+                }
+            }
+        }
+    }
+    private void assignHealthMaintainerBadgeIfEligible(Member member) {
+        long normalCount = progressRepository.countByMemberIdAndStatusAndHealthImprovementIgnoreCase(
+                member.getId(), Status.ACTIVE, "normal");
+
+        if (normalCount >= 5) {
+            assignBadgeIfNotAlready(member, "Health Maintainer");
+        }
+    }
+    private void assignGoodHealthTrackerBadgeIfEligible(Member member) {
+        long goodCount = progressRepository.countByMemberIdAndStatusAndHealthImprovementIgnoreCase(
+                member.getId(), Status.ACTIVE, "good");
+
+        if (goodCount >= 5) {
+            assignBadgeIfNotAlready(member, "Good Health Tracker");
+        }
+    }
+    private void assignBadPhaseFighterBadgeIfEligible(Member member) {
+        List<Progress> progresses = progressRepository
+                .findAllByMemberIdAndStatusOrderByDateCreatedAsc(member.getId(), Status.ACTIVE);
+
+        // Đếm số bản ghi "bad"
+        long badCount = progresses.stream()
+                .filter(p -> "bad".equalsIgnoreCase(p.getHealthImprovement()))
+                .count();
+
+        // Kiểm tra có bản ghi sau cùng mà không phải "bad"
+        boolean hasFollowUp = progresses.stream()
+                .sorted(Comparator.comparing(Progress::getDateCreated).reversed())
+                .anyMatch(p -> !"bad".equalsIgnoreCase(p.getHealthImprovement()));
+
+        if (badCount >= 5 && hasFollowUp) {
+            assignBadgeIfNotAlready(member, "Bad Phase Fighter");
+        }
+    }
+
+    private void assignBadgeIfNotAlready(Member member, String badgeName) {
+        Optional<Badge> badgeOpt = badgeRepository.findByBadgeNameIgnoreCase(badgeName);
+        if (badgeOpt.isPresent()) {
+            Badge badge = badgeOpt.get();
+            boolean alreadyHasBadge = memberBadgeRepository
+                    .existsByMemberIdAndBadgeId(member.getId(), badge.getId());
+
+            if (!alreadyHasBadge) {
+                MemberBadge memberBadge = new MemberBadge();
+                memberBadge.setMember(member);
+                memberBadge.setBadge(badge);
+                memberBadge.setEarnedDate(LocalDate.now());
+                memberBadge.setStatus(Status.ACTIVE);
+                memberBadgeRepository.save(memberBadge);
+
+                System.out.println("Badge assigned: " + badgeName + " -> memberId: " + member.getId());
+            }
+        }
     }
 }

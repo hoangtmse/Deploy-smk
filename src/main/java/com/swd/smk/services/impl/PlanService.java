@@ -109,11 +109,11 @@ public class PlanService implements IPlanService {
         String intro;
 
         // Gán nội dung mô tả riêng
-        if (cigarettesPerDay <= 10 && costPerDay <= 5.0) {
+        if (cigarettesPerDay <= 10 && costPerDay <= 125_000) {
             phase = "Light Smoker";
             reason = "You smoke 5 or fewer cigarettes per day, which is considered a light level.";
             intro = "*light smoker*";
-        } else if (cigarettesPerDay <= 20 && costPerDay <= 10.0) {
+        } else if (cigarettesPerDay <= 20 && costPerDay <= 250_000) {
             phase = "Moderate Smoker";
             reason = "You smoke between 6 to 20 cigarettes per day, which is considered a moderate level.";
             intro = "*moderate smoker*";
@@ -168,11 +168,11 @@ public class PlanService implements IPlanService {
         LocalDate today = LocalDate.now();
 
         // Categorize smoking levels based on cigarettes per day
-        if (cigarettesPerDay <= 10 && costPerDay <= 5.0) {
+        if (cigarettesPerDay <= 10 && costPerDay <= 125_000) {
             plan.setPhases("Light Smoker");
             plan.setReason("You smoke 5 or fewer cigarettes per day, which is considered a light level.");
             plan.setPlanDetails("You are a light smoker. Consider reducing your smoking gradually over the next 3 months. Please subscribe to our smoking cessation program membership package for personalized support.");
-        } else if (cigarettesPerDay <= 20 && costPerDay <= 10.0) {
+        } else if (cigarettesPerDay <= 20 && costPerDay <= 250_000) {
             plan.setPhases("Moderate Smoker");
             plan.setReason("You smoke between 6 to 20 cigarettes per day, which is considered a moderate level.");
             plan.setPlanDetails("You are a moderate smoker. Consider reducing your smoking gradually over the next 3 months. Please subscribe to our smoking cessation program membership package for personalized support.");

@@ -52,8 +52,14 @@ public class ProgressService implements IProgressService {
                 throw new OurException("No active smoking log found for member with ID: " + progressDTO.getMemberId());
             }
 
-            SmokingLog smokingLog = smokingLogOpt.get();
+            List<Progress> existingProgresses = progressRepository.findAllByMemberIdAndStatus(progressDTO.getMemberId(), Status.ACTIVE);
+            for (Progress p : existingProgresses) {
+                if (p.getDateCreated().equals(LocalDate.now())) {
+                    throw new OurException("Progress already exists for today");
+                }
+            }
 
+            SmokingLog smokingLog = smokingLogOpt.get();
 
             double totalMoneyPerDay = smokingLog.getCigarettesPerDay() * smokingLog.getCost();
             double moneySaved = totalMoneyPerDay - progressDTO.getDaysSmokeFree() * smokingLog.getCost();

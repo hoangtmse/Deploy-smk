@@ -1,33 +1,15 @@
 package com.swd.smk.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.swd.smk.dto.MemberDTO;
-import com.swd.smk.dto.MemberShipPackageDTO;
-import com.swd.smk.dto.AdminDTO;
-import com.swd.smk.dto.BadgeDTO;
-import com.swd.smk.dto.CoachDTO;
-import com.swd.smk.dto.ConsultationDTO;
-import com.swd.smk.dto.FeedBackDTO;
-import com.swd.smk.dto.NotificationDTO;
-import com.swd.smk.dto.PlanDTO;
-import com.swd.smk.dto.PostDTO;
-import com.swd.smk.dto.ProgressDTO;
-import com.swd.smk.dto.SmokingLogDTO;
-import com.swd.smk.dto.MemberBadgeDTO;
-import com.swd.smk.model.Member;
-import com.swd.smk.model.MembershipPackage;
-import com.swd.smk.model.Admin;
-import com.swd.smk.model.Badge;
-import com.swd.smk.model.Coach;
-import com.swd.smk.model.Consultation;
-import com.swd.smk.model.Feedback;
-import com.swd.smk.model.Notification;
-import com.swd.smk.model.Plan;
-import com.swd.smk.model.Post;
-import com.swd.smk.model.Progress;
-import com.swd.smk.model.SmokingLog;
+import com.swd.smk.dto.*;
+import com.swd.smk.model.*;
 import com.swd.smk.model.jointable.MemberBadge;
+import com.swd.smk.model.plandetails.CopingMechanism;
+import com.swd.smk.model.plandetails.PlanDay;
+import com.swd.smk.model.plandetails.PlanPhase;
+import com.swd.smk.model.plandetails.PlanWeek;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -199,14 +181,14 @@ public class Converter {
 
                 // Tách phần JSON Schema từ trong text
                 Map<String, Object> planSchema = extractJsonSchema(text);
-                dto.setPlanSchema(planSchema);
+//                dto.setPlanSchema(planSchema);
             } else {
-                dto.setPlanDetails(null);
-                dto.setPlanSchema(null);
+//                dto.setPlanDetails(null);
+//                dto.setPlanSchema(null);
             }
         } catch (Exception e) {
-            dto.setPlanDetails(null);
-            dto.setPlanSchema(null);
+//            dto.setPlanDetails(null);
+//            dto.setPlanSchema(null);
         }
 
         return dto;
@@ -293,5 +275,56 @@ public class Converter {
         return dto;
     }
 
+    public static TransactionDTO convertTransactionToDTO(Transaction model) {
+        TransactionDTO dto = new TransactionDTO();
+        dto.setId(model.getId());
+        if (model.getMember() != null) {
+            dto.setMemberId(model.getMember().getId());
+        }
+        if (model.getMembershipPackage() != null) {
+            dto.setPackageId(model.getMembershipPackage().getId());
+        }
+        dto.setOrderInfo(model.getOrderInfo());
+        dto.setBankCode(model.getBankCode());
+        dto.setAmount(model.getAmount());
+        dto.setResponseCode(model.getResponseCode());
+        dto.setTransactionDate(model.getDateCreated() != null ? model.getDateCreated().toString() : null);
+        dto.setStatus(model.getStatus());
+        return dto;
+    }
 
+    public static PlanWeekDTO convertPlanWeekToDTO(PlanWeek model) {
+        PlanWeekDTO dto = new PlanWeekDTO();
+        dto.setWeekNumber(model.getWeekNumber());
+        if (model.getDays() != null){
+            dto.setDays(model.getDays().stream()
+                    .map(Converter::convertPlanDayToDTO)
+                    .collect(Collectors.toList()));
+        }
+        return dto;
+    }
+
+    public static PlanDayDTO convertPlanDayToDTO(PlanDay model) {
+        PlanDayDTO dto = new PlanDayDTO();
+        dto.setDayNumber(model.getDayNumber());
+        dto.setGoal(model.getGoal());
+        dto.setTask(model.getTask());
+        dto.setTip(model.getTip());
+        return dto;
+    }
+
+    public static CopingMechanismDTO convertCopingMechanismToDTO(CopingMechanism model) {
+        CopingMechanismDTO dto = new CopingMechanismDTO();
+        dto.setContent(model.getContent());;
+        return dto;
+    }
+
+    public static PlanPhaseDTO convertPlanPhaseToDTO(PlanPhase model) {
+        PlanPhaseDTO dto = new PlanPhaseDTO();
+        dto.setGoal(model.getGoal());
+        dto.setPhaseNumber(model.getPhaseNumber());
+        dto.setWeekRange(model.getWeekRange());
+        dto.setStrategies(new ArrayList<>(model.getStrategies()));
+        return dto;
+    }
 }

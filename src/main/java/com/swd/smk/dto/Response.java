@@ -63,4 +63,19 @@ public class Response {
 
     private ProgressLogDTO progressLog;
 
+    private TransactionDTO transaction;
+    private List<TransactionDTO> transactions;
+
+    private PlanDayDTO planDay;
+    private List<PlanDayDTO> planDays;
+
+    private PlanWeekDTO planWeek;
+    private List<PlanWeekDTO> planWeeks;
+
+    private CopingMechanismDTO copingMechanism;
+    private List<CopingMechanismDTO> copingMechanisms;
+
+    private PlanPhaseDTO planPhase;
+    private List<PlanPhaseDTO> planPhases;
+
 }

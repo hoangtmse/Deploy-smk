@@ -1,14 +1,19 @@
 package com.swd.smk.services.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swd.smk.config.QnAService;
-import com.swd.smk.dto.PlanDTO;
-import com.swd.smk.dto.Response;
+import com.swd.smk.dto.*;
 import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
 import com.swd.smk.model.Member;
 import com.swd.smk.model.Plan;
 import com.swd.smk.model.Progress;
 import com.swd.smk.model.SmokingLog;
+import com.swd.smk.model.plandetails.CopingMechanism;
+import com.swd.smk.model.plandetails.PlanDay;
+import com.swd.smk.model.plandetails.PlanPhase;
+import com.swd.smk.model.plandetails.PlanWeek;
 import com.swd.smk.repository.*;
 import com.swd.smk.services.interfac.IMembershipPackage;
 import com.swd.smk.services.interfac.IPlanService;
@@ -44,43 +49,48 @@ public class PlanService implements IPlanService {
     private ProgressRepository progressRepository;
 
     @Autowired
+    private PlanPhaseRepository planPhaseRepository;
+
+    @Autowired
+    private PlanWeekRepository planWeekRepository;
+
+    @Autowired
+    private PlanDayRepository planDayRepository;
+
+    @Autowired
+    private CopingMechanismRepository copingMechanismRepository;
+
+    @Autowired
     private QnAService qnAService;
 
     @Override
     public Response createPlan(Long memberId, Long smokingLogId) {
         Response response = new Response();
         try {
-            // Validate the planDTO fields
-            Optional<Member> memberOpt = memberRepository.findById(memberId);
-            if (memberOpt.isEmpty()) {
-                throw new OurException("Member not found with ID: " + memberId);
-            }
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new OurException("Member not found with ID: " + memberId));
 
-            boolean isPlanExists = planRepository.existsByMemberIdAndStatus(memberId, Status.ACTIVE);
-            if (isPlanExists) {
+            if (planRepository.existsByMemberIdAndStatus(memberId, Status.ACTIVE)) {
                 throw new OurException("A plan already exists for this member.");
             }
 
-            boolean isMembershipPackageExists = membershipPackageRepository.existsByMemberId(memberId);
-            if(isMembershipPackageExists){
-                SmokingLog smokingLog = smokingLogRepository.findById(smokingLogId)
-                        .orElseThrow(() -> new OurException("Smoking log not found with ID: " + smokingLogId));
-                Plan plan = calculateLevelsSmokingMembershipPackage(smokingLog);
-                plan.setMember(memberOpt.get());
+            boolean hasMembershipPackage = membershipPackageRepository.existsByMemberId(memberId);
+            SmokingLog smokingLog = smokingLogRepository.findById(smokingLogId)
+                    .orElseThrow(() -> new OurException("Smoking log not found with ID: " + smokingLogId));
+
+            Plan plan;
+            if (hasMembershipPackage) {
+                plan = calculateLevelsSmokingMembershipPackage(smokingLog, member);
+            } else {
+                plan = calculateLevelsSmoking(smokingLog);
+                plan.setMember(member);
                 planRepository.save(plan);
-                response.setStatusCode(200);
-                response.setMessage("Plan created successfully");
-                response.setPlan(Converter.convertPlanToDTO(plan));
-            }else {
-                SmokingLog smokingLog = smokingLogRepository.findById(smokingLogId)
-                        .orElseThrow(() -> new OurException("Smoking log not found with ID: " + smokingLogId));
-                Plan plan = calculateLevelsSmoking(smokingLog);
-                plan.setMember(memberOpt.get());
-                planRepository.save(plan);
-                response.setStatusCode(200);
-                response.setMessage("Plan created successfully");
-                response.setPlan(Converter.convertPlanToDTO(plan));
             }
+
+            response.setStatusCode(200);
+            response.setMessage("Plan created successfully");
+            response.setPlan(Converter.convertPlanToDTO(plan));
+
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -91,7 +101,7 @@ public class PlanService implements IPlanService {
         return response;
     }
 
-    private Plan calculateLevelsSmokingMembershipPackage(SmokingLog smokingLog) {
+    private Plan calculateLevelsSmokingMembershipPackage(SmokingLog smokingLog, Member member) throws Exception {
         int cigarettesPerDay = smokingLog.getCigarettesPerDay();
         double costPerDay = smokingLog.getCost();
         String frequency = smokingLog.getFrequency();
@@ -103,61 +113,124 @@ public class PlanService implements IPlanService {
         plan.setDateCreated(today);
         plan.setDateUpdated(today);
         plan.setStatus(Status.ACTIVE);
+        plan.setMember(member);
 
-        String phase;
-        String reason;
-        String intro;
-
-        // Gán nội dung mô tả riêng
+        String phaseName, reason, intro;
         if (cigarettesPerDay <= 10 && costPerDay <= 125_000) {
-            phase = "Light Smoker";
-            reason = "You smoke 5 or fewer cigarettes per day, which is considered a light level.";
+            phaseName = "Light Smoker";
+            reason = "You smoke 5 or fewer cigarettes per day.";
             intro = "*light smoker*";
         } else if (cigarettesPerDay <= 20 && costPerDay <= 250_000) {
-            phase = "Moderate Smoker";
-            reason = "You smoke between 6 to 20 cigarettes per day, which is considered a moderate level.";
+            phaseName = "Moderate Smoker";
+            reason = "You smoke between 6 to 20 cigarettes per day.";
             intro = "*moderate smoker*";
         } else {
-            phase = "Heavy Smoker";
-            reason = "You smoke more than 20 cigarettes per day, which is considered a heavy level.";
+            phaseName = "Heavy Smoker";
+            reason = "You smoke more than 20 cigarettes per day.";
             intro = "*heavy smoker*";
         }
 
-        // Nội dung prompt chung cho tất cả các loại
-        String prompt = String.format("""
-            I have a smoker categorized as a %s with the following information:
-            - Cigarettes per day: %d
-            - Cost per day: %.1f
-            - Smoking frequency: %s
-
-            Please provide:
-            1. A 3-month smoking reduction plan, divided into **3 weekly phases**, each lasting 4 weeks.
-            - For each phase, show **weekly goals and strategies** using bullet points.
-            - Additionally, for each week, include a **daily breakdown** (7 days), with:
-            - Day number
-            - Daily goal
-            - Specific task or advice
-            - Motivational tip
-            2. At the end of your response, include a **valid JSON Schema** wrapped inside triple backticks (```) and marked with `json`, describing the structure of the plan.
-
-            The JSON Schema should include:
-            - Plan name
-            - Initial cigarettes per day
-            - Cost per day
-            - Frequency
-            - An array of 3 phases (each with phase number, week range (4 weeks), goal, and strategies)
-            - An array of day breakdowns for each week (7 days per week)
-            - A list of coping mechanisms
-            - Notes or disclaimers
-
-            Only return one candidate. Make sure the JSON schema is clean and valid for parsing.
-            """, intro, cigarettesPerDay, costPerDay, frequency);
-
-        plan.setPhases(phase);
+        plan.setPhases(phaseName);
         plan.setReason(reason);
-        plan.setPlanDetails(qnAService.getAnswer(prompt));
+
+        String prompt = String.format("""
+        I have a smoker categorized as a %s with the following information:
+        - Cigarettes per day: %d
+        - Cost per day: %.1f
+        - Smoking frequency: %s
+
+        Please generate a 3-month smoking reduction plan (12 weeks), and return it in VALID JSON FORMAT with the following fields:
+
+        - planName
+        - initialCigarettesPerDay
+        - costPerDay
+        - frequency
+        - phases: array of 3 (each with phaseNumber, weekRange, goal, strategies)
+        - weeks: each with weekNumber, days[]
+        - each day: dayNumber, goal, task, tip
+        - copingMechanisms
+        - notesOrDisclaimers
+
+        ⚠️ Important:
+        - Return only actual JSON data
+        - Do NOT include explanation, headers, markdown, or JSON schema
+        - Wrap the JSON in triple backticks with `json`
+    """, intro, cigarettesPerDay, costPerDay, frequency);
+
+        String aiResponse = qnAService.getAnswer(prompt);
+        plan.setPlanDetails(aiResponse);
+        planRepository.save(plan);
+
+        String json = extractJsonFromResponse(aiResponse);
+        ObjectMapper mapper = new ObjectMapper();
+        PlanJsonDTO planDTO = mapper.readValue(json, PlanJsonDTO.class);
+
+        if (planDTO.getPhases() != null) {
+            for (PlanPhaseDTO phaseDTO : planDTO.getPhases()) {
+                PlanPhase phase = new PlanPhase();
+                phase.setPlan(plan);
+                phase.setPhaseNumber(phaseDTO.getPhaseNumber());
+                phase.setGoal(phaseDTO.getGoal());
+                phase.setStrategies(phaseDTO.getStrategies());
+                phase.setWeekRange(phaseDTO.getWeekRange());
+                planPhaseRepository.save(phase);
+            }
+        }
+
+        if (planDTO.getWeeks() != null) {
+            for (PlanWeekDTO weekDTO : planDTO.getWeeks()) {
+                PlanWeek week = new PlanWeek();
+                week.setPlan(plan);
+                week.setWeekNumber(weekDTO.getWeekNumber());
+                planWeekRepository.save(week);
+
+                if (weekDTO.getDays() != null) {
+                    for (PlanDayDTO dayDTO : weekDTO.getDays()) {
+                        PlanDay day = new PlanDay();
+                        day.setWeek(week);
+                        day.setDayNumber(dayDTO.getDayNumber());
+                        day.setGoal(dayDTO.getGoal());
+                        day.setTask(dayDTO.getTask());
+                        day.setTip(dayDTO.getTip());
+                        planDayRepository.save(day);
+                    }
+                }
+            }
+        }
+
+        if (planDTO.getCopingMechanisms() != null) {
+            for (String c : planDTO.getCopingMechanisms()) {
+                CopingMechanism coping = new CopingMechanism();
+                coping.setPlan(plan);
+                coping.setContent(c);
+                copingMechanismRepository.save(coping);
+            }
+        }
 
         return plan;
+    }
+
+    private String extractJsonFromResponse(String response) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response);
+
+            if (root.has("candidates")) {
+                JsonNode textNode = root.get("candidates").get(0)
+                        .get("content").get("parts").get(0).get("text");
+                if (textNode != null) {
+                    String fullText = textNode.asText();
+                    int start = fullText.indexOf("```json");
+                    int end = fullText.indexOf("```", start + 7);
+                    if (start != -1 && end != -1) {
+                        return fullText.substring(start + 7, end).trim();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("❌ extractJsonFromResponse error: " + e.getMessage());
+        }
+        return null;
     }
 
     private Plan calculateLevelsSmoking(SmokingLog smokingLog) {
@@ -276,13 +349,27 @@ public class PlanService implements IPlanService {
             if (memberOpt.isEmpty()) {
                 throw new OurException("Member not found with ID: " + memberId);
             }
-            List<Plan> plans = planRepository.findByMemberIdAndStatus(memberId, Status.ACTIVE);
-            List<PlanDTO> planDTOs = plans.stream()
-                    .map(Converter::convertPlanToDTO)
-                    .collect(Collectors.toList());
+
+            Plan latestPlan = planRepository.findFirstByMemberIdAndStatusOrderByDateCreatedDesc(memberId, Status.ACTIVE);
+            if (latestPlan == null) {
+                throw new OurException("No active plan found for member with ID: " + memberId);
+            }
+            List<PlanPhase> phases = planPhaseRepository.findByPlanId(latestPlan.getId());
+            List<PlanWeek> weeks = planWeekRepository.findByPlanId(latestPlan.getId());
+            List<CopingMechanism> copingMechanisms = copingMechanismRepository.findByPlanId(latestPlan.getId());
+            PlanDTO planDTO = Converter.convertPlanToDTO(latestPlan);
             response.setStatusCode(200);
-            response.setMessage("Plans for member retrieved successfully");
-            response.setPlans(planDTOs);
+            response.setMessage("Plan retrieved successfully for member ID: " + memberId);
+            response.setPlan(planDTO);
+            response.setPlanPhases(phases.stream()
+                    .map(Converter::convertPlanPhaseToDTO)
+                    .collect(Collectors.toList()));
+            response.setPlanWeeks(weeks.stream()
+                    .map(Converter::convertPlanWeekToDTO)
+                    .collect(Collectors.toList()));
+            response.setCopingMechanisms(copingMechanisms.stream()
+                    .map(Converter::convertCopingMechanismToDTO)
+                    .collect(Collectors.toList()));
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -292,7 +379,5 @@ public class PlanService implements IPlanService {
         }
         return response;
     }
-
-
 }
 

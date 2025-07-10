@@ -57,6 +57,11 @@ public class ConsultationService implements IConsultationService {
                 throw new OurException("Coach id is required");
             }
 
+            Optional<Consultation> existConsultationOpt = consultationRepository
+                    .findByCoachIdAndExactTime(consultationDTO.getCoachId(),
+                            consultationDTO.getStartDate(),
+                            consultationDTO.getEndDate());
+
             // Set member if id is provided
             if (consultationDTO.getMemberId() != null) {
                 if (!memberRepository.existsById(consultationDTO.getMemberId())) {
@@ -71,8 +76,8 @@ public class ConsultationService implements IConsultationService {
             consultation.setConsultationDate(consultationDTO.getConsultationDate());
             consultation.setStartDate(consultationDTO.getStartDate());
             consultation.setEndDate(consultationDTO.getEndDate());
-            if (consultationDTO.getGoogleMeetLink() != null) {
-                consultation.setGoogleMeetLink(consultationDTO.getGoogleMeetLink());
+            if (existConsultationOpt.isPresent()) {
+                consultation.setGoogleMeetLink(existConsultationOpt.get().getGoogleMeetLink());
             } else {
                 // Generate Google Meet link if not provided
                 String meetLink = googleMeetService.createGoogleMeetLink(consultationDTO.getNotes(),consultationDTO.getStartDate(), consultationDTO.getEndDate());

@@ -4,8 +4,11 @@ import com.swd.smk.dto.Response;
 import com.swd.smk.dto.TransactionStatusDTO;
 import com.swd.smk.model.Member;
 import com.swd.smk.model.MembershipPackage;
+import com.swd.smk.model.Transaction;
 import com.swd.smk.repository.MemberRepository;
 import com.swd.smk.repository.MembershipPackageRepository;
+import com.swd.smk.repository.TransactionRepository;
+import com.swd.smk.services.interfac.ITransactionService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -35,6 +39,12 @@ public class PaymentController {
 
     @Autowired
     VnpayProperties vnpayProperties;
+
+    @Autowired
+    TransactionRepository transactionRepository;
+
+    @Autowired
+    ITransactionService transactionService;
 
     @GetMapping("/create-payment")
     public ResponseEntity<?> createPayment(HttpServletRequest request) {
@@ -112,22 +122,17 @@ public class PaymentController {
             @RequestParam(value = "vnp_ResponseCode", required = false) String responseCode) {
 
         TransactionStatusDTO transactionStatus = new TransactionStatusDTO();
-        if(responseCode != null && responseCode.equals("00")) {
-            transactionStatus.setStatus("COMPLETED");
-            transactionStatus.setMessage("Transaction successful");
-            Member member = memberRepository.findById(memberId).orElse(null);
-            MembershipPackage membershipPackage = membershipPackageRepository.findById(packageId).orElse(null);
-            if (member != null && membershipPackage != null) {
-                member.setMembership_Package(membershipPackage);
-                memberRepository.save(member);
-            } else {
-                transactionStatus.setMessage("Member or package not found");
-            }
+        Double amountExchange =  Double.parseDouble(amount) / 100.0; // Chuyển đổi từ đồng sang tiền tệ
 
-        } else {
+        Transaction transaction =  transactionService.createTransaction(memberId, packageId, orderInfo, bankCode, amountExchange, responseCode);
+        if (transaction == null) {
+            transactionStatus.setMessage("Transaction creation failed");
             transactionStatus.setStatus("FAILED");
-            transactionStatus.setMessage("Transaction failed: " + responseCode);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(transactionStatus);
         }
+        transactionStatus.setMessage("Transaction created successfully");
+        transactionStatus.setStatus("COMPLETED");
+
         return ResponseEntity.status(HttpStatus.OK).body(transactionStatus);
     }
 

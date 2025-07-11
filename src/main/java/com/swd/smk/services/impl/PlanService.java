@@ -70,9 +70,9 @@ public class PlanService implements IPlanService {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new OurException("Member not found with ID: " + memberId));
 
-            if (planRepository.existsByMemberIdAndStatus(memberId, Status.ACTIVE)) {
-                throw new OurException("A plan already exists for this member.");
-            }
+//            if (planRepository.existsByMemberIdAndStatus(memberId, Status.ACTIVE)) {
+//                throw new OurException("A plan already exists for this member.");
+//            }
 
             boolean hasMembershipPackage = membershipPackageRepository.existsByMemberId(memberId);
             SmokingLog smokingLog = smokingLogRepository.findById(smokingLogId)
@@ -139,13 +139,13 @@ public class PlanService implements IPlanService {
         - Cost per day: %.1f
         - Smoking frequency: %s
 
-        Please generate a 3-month smoking reduction plan (12 weeks), and return it in VALID JSON FORMAT with the following fields:
+        Please generate a 1-month smoking reduction plan (4 weeks), and return it in VALID JSON Q FORMAT with the following fields:
 
         - planName
         - initialCigarettesPerDay
         - costPerDay
         - frequency
-        - phases: array of 3 (each with phaseNumber, weekRange, goal, strategies)
+        - phases: array of 4 (each with phaseNumber, weekRange, goal, strategies)
         - weeks: each with weekNumber, days[]
         - each day: dayNumber, goal, task, tip
         - copingMechanisms

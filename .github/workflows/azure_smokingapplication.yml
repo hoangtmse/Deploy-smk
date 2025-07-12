@@ -43,11 +43,17 @@ jobs:
           VNPAY_URL: ${{ secrets.VNPAY_URL }}
         run: mvn clean install -DskipTests # Thêm -DskipTests để bỏ qua chạy test nếu cần
 
+      - name: Get JAR file name
+        id: get_jar_name
+        # Tìm chính xác tên file JAR đã được build và lưu vào biến môi trường
+        run: echo "JAR_FILE_NAME=$(ls target/*.jar | xargs basename)" >> $GITHUB_ENV
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar' # Đảm bảo đường dẫn này đúng với file JAR của bạn
+          # Sử dụng biến môi trường JAR_FILE_NAME để chỉ định file
+          path: '${{ github.workspace }}/target/${{ env.JAR_FILE_NAME }}'
 
   deploy:
     runs-on: ubuntu-latest

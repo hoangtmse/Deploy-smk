@@ -100,6 +100,7 @@ public class ConsultationService implements IConsultationService {
             consultationRepository.save(consultation);
             response.setStatusCode(200);
             response.setMessage("Consultation created successfully");
+            response.setConsultation(Converter.convertConsultationToDTO(consultation));
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

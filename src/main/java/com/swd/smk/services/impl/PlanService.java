@@ -70,23 +70,17 @@ public class PlanService implements IPlanService {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new OurException("Member not found with ID: " + memberId));
 
-//            if (planRepository.existsByMemberIdAndStatus(memberId, Status.ACTIVE)) {
-//                throw new OurException("A plan already exists for this member.");
-//            }
+            if (planRepository.existsByMemberIdAndStatus(memberId, Status.ACTIVE)) {
+                throw new OurException("A plan already exists for this member.");
+            }
 
             boolean hasMembershipPackage = membershipPackageRepository.existsByMemberId(memberId);
             SmokingLog smokingLog = smokingLogRepository.findById(smokingLogId)
                     .orElseThrow(() -> new OurException("Smoking log not found with ID: " + smokingLogId));
 
             Plan plan;
-            if (hasMembershipPackage) {
-                plan = calculateLevelsSmokingMembershipPackage(smokingLog, member);
-            } else {
-                plan = calculateLevelsSmoking(smokingLog);
-                plan.setMember(member);
-                planRepository.save(plan);
-            }
 
+            plan = calculateLevelsSmokingMembershipPackage(smokingLog, member);
             response.setStatusCode(200);
             response.setMessage("Plan created successfully");
             response.setPlan(Converter.convertPlanToDTO(plan));
@@ -233,35 +227,35 @@ public class PlanService implements IPlanService {
         return null;
     }
 
-    private Plan calculateLevelsSmoking(SmokingLog smokingLog) {
-        int cigarettesPerDay = smokingLog.getCigarettesPerDay();
-        double costPerDay = smokingLog.getCost();
-        String frequency = smokingLog.getFrequency();
-        Plan plan = new Plan();
-        LocalDate today = LocalDate.now();
-
-        // Categorize smoking levels based on cigarettes per day
-        if (cigarettesPerDay <= 10 && costPerDay <= 125_000) {
-            plan.setPhases("Light Smoker");
-            plan.setReason("You smoke 5 or fewer cigarettes per day, which is considered a light level.");
-            plan.setPlanDetails("You are a light smoker. Consider reducing your smoking gradually over the next 3 months. Please subscribe to our smoking cessation program membership package for personalized support.");
-        } else if (cigarettesPerDay <= 20 && costPerDay <= 250_000) {
-            plan.setPhases("Moderate Smoker");
-            plan.setReason("You smoke between 6 to 20 cigarettes per day, which is considered a moderate level.");
-            plan.setPlanDetails("You are a moderate smoker. Consider reducing your smoking gradually over the next 3 months. Please subscribe to our smoking cessation program membership package for personalized support.");
-        } else {
-            plan.setPhases("Heavy Smoker");
-            plan.setReason("You smoke more than 20 cigarettes per day, which is considered a heavy level.");
-            plan.setPlanDetails("You are a heavy smoker. Consider reducing your smoking gradually over the next 3 months. Please subscribe to our smoking cessation program membership package for personalized support.");
-        }
-        plan.setStartDate(today);
-        plan.setExpectedEndDate(today.plusMonths(3));
-        plan.setDateCreated(today);
-        plan.setStatus(Status.ACTIVE);
-        plan.setDateUpdated(today);
-
-        return plan;
-    }
+//    private Plan calculateLevelsSmoking(SmokingLog smokingLog) {
+//        int cigarettesPerDay = smokingLog.getCigarettesPerDay();
+//        double costPerDay = smokingLog.getCost();
+//        String frequency = smokingLog.getFrequency();
+//        Plan plan = new Plan();
+//        LocalDate today = LocalDate.now();
+//
+//        // Categorize smoking levels based on cigarettes per day
+//        if (cigarettesPerDay <= 10 && costPerDay <= 125_000) {
+//            plan.setPhases("Light Smoker");
+//            plan.setReason("You smoke 5 or fewer cigarettes per day, which is considered a light level.");
+//            plan.setPlanDetails("You are a light smoker. Consider reducing your smoking gradually over the next 3 months. Please subscribe to our smoking cessation program membership package for personalized support.");
+//        } else if (cigarettesPerDay <= 20 && costPerDay <= 250_000) {
+//            plan.setPhases("Moderate Smoker");
+//            plan.setReason("You smoke between 6 to 20 cigarettes per day, which is considered a moderate level.");
+//            plan.setPlanDetails("You are a moderate smoker. Consider reducing your smoking gradually over the next 3 months. Please subscribe to our smoking cessation program membership package for personalized support.");
+//        } else {
+//            plan.setPhases("Heavy Smoker");
+//            plan.setReason("You smoke more than 20 cigarettes per day, which is considered a heavy level.");
+//            plan.setPlanDetails("You are a heavy smoker. Consider reducing your smoking gradually over the next 3 months. Please subscribe to our smoking cessation program membership package for personalized support.");
+//        }
+//        plan.setStartDate(today);
+//        plan.setExpectedEndDate(today.plusMonths(3));
+//        plan.setDateCreated(today);
+//        plan.setStatus(Status.ACTIVE);
+//        plan.setDateUpdated(today);
+//
+//        return plan;
+//    }
 
     @Override
     public Response deletePlan(Long planId) {

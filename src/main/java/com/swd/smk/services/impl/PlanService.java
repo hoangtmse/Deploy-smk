@@ -6,10 +6,7 @@ import com.swd.smk.config.QnAService;
 import com.swd.smk.dto.*;
 import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
-import com.swd.smk.model.Member;
-import com.swd.smk.model.Plan;
-import com.swd.smk.model.Progress;
-import com.swd.smk.model.SmokingLog;
+import com.swd.smk.model.*;
 import com.swd.smk.model.plandetails.CopingMechanism;
 import com.swd.smk.model.plandetails.PlanDay;
 import com.swd.smk.model.plandetails.PlanPhase;
@@ -23,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,6 +61,9 @@ public class PlanService implements IPlanService {
     @Autowired
     private QnAService qnAService;
 
+    @Autowired
+    private NotificationRepository notificationRepository;
+
     @Override
     public Response createPlan(Long memberId, Long smokingLogId) {
         Response response = new Response();
@@ -84,6 +85,15 @@ public class PlanService implements IPlanService {
             response.setStatusCode(200);
             response.setMessage("Plan created successfully");
             response.setPlan(Converter.convertPlanToDTO(plan));
+
+            // Create a progress entry for the plan
+            Notification notification = new Notification();
+            notification.setMember(member);
+            notification.setStatus(Status.ACTIVE);
+            notification.setTitle("New Smoking Cessation Plan Created");
+            notification.setMessage("Your smoking cessation plan has been created successfully. Please check your plan for details.");
+            notification.setSentDate(LocalDateTime.now());
+            notificationRepository.save(notification);
 
         } catch (OurException e) {
             response.setStatusCode(400);

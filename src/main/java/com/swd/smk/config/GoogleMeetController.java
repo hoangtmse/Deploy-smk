@@ -11,7 +11,7 @@ public class GoogleMeetController {
     private GoogleMeetService googleMeetService;
 
     // 1. Trả về URL để người dùng nhấn đăng nhập Google
-        @GetMapping("/auth-url")
+    @GetMapping("/auth-url")
     public String getAuthUrl() {
         return googleMeetService.getAuthorizationUrl();
     }

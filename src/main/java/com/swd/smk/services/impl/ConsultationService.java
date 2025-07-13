@@ -8,9 +8,11 @@ import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
 import com.swd.smk.model.Coach;
 import com.swd.smk.model.Consultation;
+import com.swd.smk.model.Notification;
 import com.swd.smk.repository.CoachRepository;
 import com.swd.smk.repository.ConsultationRepository;
 import com.swd.smk.repository.MemberRepository;
+import com.swd.smk.repository.NotificationRepository;
 import com.swd.smk.services.interfac.IConsultationService;
 import com.swd.smk.utils.Converter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +43,9 @@ public class ConsultationService implements IConsultationService {
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Override
     public Response createConsultation(ConsultationDTO consultationDTO) {
@@ -101,6 +107,17 @@ public class ConsultationService implements IConsultationService {
             response.setStatusCode(200);
             response.setMessage("Consultation created successfully");
             response.setConsultation(Converter.convertConsultationToDTO(consultation));
+
+            // Notify the member about the consultation creation
+            Notification notification = new Notification();
+            notification.setMember(consultation.getMember());
+            notification.setStatus(Status.ACTIVE);
+            notification.setTitle("Consultation Created");
+            notification.setMessage("Your consultation with coach " + consultation.getCoach().getName() + " has been created successfully. \n" +
+                    "Consultation Date: " + consultation.getConsultationDate() + "\n" +
+                    "Google Meet Link: " + consultation.getGoogleMeetLink());
+            notification.setSentDate(LocalDateTime.now());
+            notificationRepository.save(notification);
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

@@ -5,10 +5,7 @@ import com.swd.smk.dto.ProgressLogDTO;
 import com.swd.smk.dto.Response;
 import com.swd.smk.enums.Status;
 import com.swd.smk.exception.OurException;
-import com.swd.smk.model.Badge;
-import com.swd.smk.model.Member;
-import com.swd.smk.model.Progress;
-import com.swd.smk.model.SmokingLog;
+import com.swd.smk.model.*;
 import com.swd.smk.model.jointable.MemberBadge;
 import com.swd.smk.repository.*;
 import com.swd.smk.services.interfac.IProgressService;
@@ -17,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +35,9 @@ public class ProgressService implements IProgressService {
 
     @Autowired
     private MemberBadgeRepository memberBadgeRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
     // Implement the methods defined in IProgressService interface
     @Override
     public Response createProgress(ProgressDTO progressDTO) {
@@ -91,6 +92,7 @@ public class ProgressService implements IProgressService {
             assignGoodHealthTrackerBadgeIfEligible(memberOpt.get());
             // Assign the bad phase fighter badge if eligible
             assignBadPhaseFighterBadgeIfEligible(memberOpt.get());
+
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -288,6 +290,15 @@ public class ProgressService implements IProgressService {
 
                     memberBadgeRepository.save(memberBadge);
                     System.out.println("First Step badge assigned to member: " + member.getId());
+
+                    // Tạo thông báo cho member
+                    Notification notification = new Notification();
+                    notification.setMember(member);
+                    notification.setMessage("Congratulations! You have earned the 'First Step' badge for your first progress entry.");
+                    notification.setStatus(Status.ACTIVE);
+                    notification.setTitle("Badge Earned: First Step");
+                    notification.setSentDate(LocalDateTime.now());
+                    notificationRepository.save(notification);
                 }
             }
         }
@@ -311,6 +322,15 @@ public class ProgressService implements IProgressService {
 
                     memberBadgeRepository.save(memberBadge);
                     System.out.println("Progress Enthusiast badge assigned to member: " + member.getId());
+
+                    // Tạo thông báo cho member
+                    Notification notification = new Notification();
+                    notification.setMember(member);
+                    notification.setMessage("Congratulations! You have earned the 'Progress Enthusiast' badge for your dedication to tracking your progress.");
+                    notification.setStatus(Status.ACTIVE);
+                    notification.setTitle("Badge Earned: Progress Enthusiast");
+                    notification.setSentDate(LocalDateTime.now());
+                    notificationRepository.save(notification);
                 }
             }
         }
@@ -358,6 +378,15 @@ public class ProgressService implements IProgressService {
 
                     memberBadgeRepository.save(memberBadge);
                     System.out.println("Consistency badge assigned to member: " + member.getId());
+
+                    // Tạo thông báo cho member
+                    Notification notification = new Notification();
+                    notification.setMember(member);
+                    notification.setMessage("Congratulations! You have earned the 'Consistency' badge for maintaining your progress for 7 consecutive days.");
+                    notification.setStatus(Status.ACTIVE);
+                    notification.setTitle("Badge Earned: Consistency");
+                    notification.setSentDate(LocalDateTime.now());
+                    notificationRepository.save(notification);
                 }
             }
         }
@@ -386,6 +415,15 @@ public class ProgressService implements IProgressService {
 
                     memberBadgeRepository.save(memberBadge);
                     System.out.println("Budget Saver badge assigned to member: " + member.getId());
+
+                    // Tạo thông báo cho member
+                    Notification notification = new Notification();
+                    notification.setMember(member);
+                    notification.setMessage("Congratulations! You have earned the 'Budget Saver' badge for saving over 100,000 VND.");
+                    notification.setStatus(Status.ACTIVE);
+                    notification.setTitle("Badge Earned: Budget Saver");
+                    notification.setSentDate(LocalDateTime.now());
+                    notificationRepository.save(notification);
                 }
             }
         }
@@ -441,6 +479,14 @@ public class ProgressService implements IProgressService {
                 memberBadgeRepository.save(memberBadge);
 
                 System.out.println("Badge assigned: " + badgeName + " -> memberId: " + member.getId());
+                // Tạo thông báo cho member
+                Notification notification = new Notification();
+                notification.setMember(member);
+                notification.setMessage("Congratulations! You have earned the '" + badgeName + "' badge for your outstanding progress.");
+                notification.setStatus(Status.ACTIVE);
+                notification.setTitle("Badge Earned: " + badgeName);
+                notification.setSentDate(LocalDateTime.now());
+                notificationRepository.save(notification);
             }
         }
     }

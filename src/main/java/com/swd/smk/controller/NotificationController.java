@@ -45,5 +45,11 @@ public class NotificationController {
         Response response = notificationService.getAllNotifications();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("/user/get-notifications-by-member/{memberId}")
+    public ResponseEntity<Response> getNotificationsByMemberId(@PathVariable Long memberId) {
+        Response response = notificationService.getNotificationsByMemberId(memberId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }
 

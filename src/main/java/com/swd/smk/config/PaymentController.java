@@ -2,11 +2,14 @@ package com.swd.smk.config;
 
 import com.swd.smk.dto.Response;
 import com.swd.smk.dto.TransactionStatusDTO;
+import com.swd.smk.enums.Status;
 import com.swd.smk.model.Member;
 import com.swd.smk.model.MembershipPackage;
+import com.swd.smk.model.Notification;
 import com.swd.smk.model.Transaction;
 import com.swd.smk.repository.MemberRepository;
 import com.swd.smk.repository.MembershipPackageRepository;
+import com.swd.smk.repository.NotificationRepository;
 import com.swd.smk.repository.TransactionRepository;
 import com.swd.smk.services.interfac.ITransactionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +48,9 @@ public class PaymentController {
 
     @Autowired
     ITransactionService transactionService;
+
+    @Autowired
+    NotificationRepository notificationRepository;
 
     @GetMapping("/create-payment")
     public ResponseEntity<?> createPayment(HttpServletRequest request) {
@@ -132,6 +138,18 @@ public class PaymentController {
         }
         transactionStatus.setMessage("Transaction created successfully");
         transactionStatus.setStatus("COMPLETED");
+
+        // Create a notification for the transaction
+        Notification notification = new Notification();
+        Optional<Member> memberOpt = memberRepository.findById(memberId);
+        if (memberOpt.isPresent()) {
+            notification.setMember(memberOpt.get());
+            notification.setStatus(Status.ACTIVE);
+            notification.setTitle("Transaction Successful");
+            notification.setMessage("Your transaction with ID " + transaction.getId() + " has been completed successfully.");
+            notification.setSentDate(LocalDateTime.now());
+            notificationRepository.save(notification);
+        }
 
         return ResponseEntity.status(HttpStatus.OK).body(transactionStatus);
     }

@@ -16,6 +16,7 @@ import com.swd.smk.utils.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -55,6 +56,7 @@ public class TransactionService implements ITransactionService {
                 transaction.setStatus(Status.COMPLETED);
                 if (member != null && membershipPackage != null) {
                     member.setMembership_Package(membershipPackage);
+                    member.setJoinDate(LocalDate.now());
                     memberRepository.save(member);
                 } else {
                     throw new OurException("Member or package not found");

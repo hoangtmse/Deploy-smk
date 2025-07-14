@@ -201,6 +201,10 @@ public class MembershipPackageService implements IMembershipPackage {
             if (packageOpt.isEmpty()) throw new OurException("Membership package not found");
             if (memberOpt.isEmpty()) throw new OurException("Member not found");
 
+            if(memberOpt.get().getMembership_Package() != null && memberOpt.get().getMembership_Package().getStatus() == Status.ACTIVE) {
+                throw new OurException("Member already has an active membership package");
+            }
+
             MembershipPackage membershipPackage = packageOpt.get();
             Member member = memberOpt.get();
 

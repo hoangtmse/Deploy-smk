@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -136,6 +137,13 @@ public class MemberService implements IMemberService {
             response.setExpirationTime("7 Days");
             response.setMessage("successful");
             response.setMember(Converter.convertMemberToDTO(member));
+
+            if (member.getMembership_Package() != null &&
+                    ChronoUnit.DAYS.between(member.getJoinDate(), LocalDate.now()) > 30) {
+
+                member.setMembership_Package(null);
+                memberRepository.save(member);
+            }
 
         } catch (OurException e) {
             response.setStatusCode(400);

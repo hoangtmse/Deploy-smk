@@ -18,7 +18,8 @@ public class CorsConfig {
                         .allowedMethods("GET", "POST", "DELETE", "PUT")
                         .allowedOrigins(
                                 "http://localhost:5173",
-                                "https://smoke-vert.vercel.app"
+                                "https://smoke-vert.vercel.app",
+                                "https://smoke-cessation-sp.vercel.app/"
                         );
             }
         };

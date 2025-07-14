@@ -177,15 +177,9 @@ public class CoachService implements ICoachService {
             Coach coach = coachRepository.findById(coachId)
                     .orElseThrow(() -> new OurException("Coach not found"));
             if (coachDTO.getEmail() != null && !coachDTO.getEmail().trim().equals(coach.getEmail())) {
-                if (coachRepository.findByEmailAndStatus(coachDTO.getEmail().trim(), Status.ACTIVE).isPresent()) {
-                    throw new OurException("Email already existed");
-                }
                 coach.setEmail(coachDTO.getEmail().trim());
             }
             if (coachDTO.getUsername() != null && !coachDTO.getUsername().trim().equals(coach.getUsername())) {
-                if (coachRepository.findByUsernameAndStatus(coachDTO.getUsername().trim(), Status.ACTIVE).isPresent()) {
-                    throw new OurException("Username already existed");
-                }
                 coach.setUsername(coachDTO.getUsername().trim());
             }
             if (coachDTO.getName() != null) coach.setName(coachDTO.getName().trim());

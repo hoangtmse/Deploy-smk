@@ -7,4 +7,5 @@ public enum Status {
     COMPLETED,
     PENDING,
     FAILED,
+    BOOKED,
 }

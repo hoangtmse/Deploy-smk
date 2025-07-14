@@ -223,17 +223,23 @@ public class MemberService implements IMemberService {
             Member member = memberRepository.findByIdAndStatus(memberId, Status.ACTIVE)
                     .orElseThrow(() -> new OurException("Not found: " + memberId));
 
-            if (memberDTO.getEmail() != null && !memberDTO.getEmail().trim().equals(member.getEmail())) {
-                if (memberRepository.findByEmailAndStatus(memberDTO.getEmail().trim(), Status.ACTIVE).isPresent()) {
-                    throw new OurException("Email already existed");
+            if (memberDTO.getEmail() != null) {
+                String trimmedEmail = memberDTO.getEmail().trim();
+                if (!trimmedEmail.equals(member.getEmail())) {
+                    if (memberRepository.findByEmailAndStatus(trimmedEmail, Status.ACTIVE).isPresent()) {
+                        throw new OurException("Email already existed");
+                    }
+                    member.setEmail(trimmedEmail);
                 }
-                member.setEmail(memberDTO.getEmail().trim());
             }
-            if (memberDTO.getUsername() != null && !memberDTO.getUsername().trim().equals(member.getUsername())) {
-                if (memberRepository.findByUsernameAndStatus(memberDTO.getUsername().trim(), Status.ACTIVE).isPresent()) {
-                    throw new OurException("Username already existed");
+            if (memberDTO.getUsername() != null) {
+                String trimmedUsername = memberDTO.getUsername().trim();
+                if (!trimmedUsername.equals(member.getUsername())) {
+                    if (memberRepository.findByUsernameAndStatus(trimmedUsername, Status.ACTIVE).isPresent()) {
+                        throw new OurException("Username already existed");
+                    }
+                    member.setUsername(trimmedUsername);
                 }
-                member.setUsername(memberDTO.getUsername().trim());
             }
             if (memberDTO.getFullName() != null) {
                 member.setFullName(memberDTO.getFullName().trim());

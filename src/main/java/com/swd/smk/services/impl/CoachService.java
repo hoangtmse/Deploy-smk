@@ -176,11 +176,23 @@ public class CoachService implements ICoachService {
         try {
             Coach coach = coachRepository.findById(coachId)
                     .orElseThrow(() -> new OurException("Coach not found"));
-            if (coachDTO.getEmail() != null && !coachDTO.getEmail().trim().equals(coach.getEmail())) {
-                coach.setEmail(coachDTO.getEmail().trim());
+            if (coachDTO.getEmail() != null) {
+                String trimmedEmail = coachDTO.getEmail().trim();
+                if (!trimmedEmail.equals(coach.getEmail())) {
+                    if (coachRepository.findByEmailAndStatus(trimmedEmail, Status.ACTIVE).isPresent()) {
+                        throw new OurException("Email already existed");
+                    }
+                    coach.setEmail(trimmedEmail);
+                }
             }
-            if (coachDTO.getUsername() != null && !coachDTO.getUsername().trim().equals(coach.getUsername())) {
-                coach.setUsername(coachDTO.getUsername().trim());
+            if (coachDTO.getUsername() != null) {
+                String trimmedUsername = coachDTO.getUsername().trim();
+                if (!trimmedUsername.equals(coach.getUsername())) {
+                    if (coachRepository.findByUsernameAndStatus(trimmedUsername, Status.ACTIVE).isPresent()) {
+                        throw new OurException("Username already existed");
+                    }
+                    coach.setUsername(trimmedUsername);
+                }
             }
             if (coachDTO.getName() != null) coach.setName(coachDTO.getName().trim());
             if (coachDTO.getPassword() != null) coach.setPassword(passwordEncoder.encode(coachDTO.getPassword().trim()));

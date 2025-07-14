@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PlanDayDTO {
+    private Long id;
     private int dayNumber;
     private String goal;
     private String task;

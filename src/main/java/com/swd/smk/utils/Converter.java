@@ -295,6 +295,7 @@ public class Converter {
 
     public static PlanWeekDTO convertPlanWeekToDTO(PlanWeek model) {
         PlanWeekDTO dto = new PlanWeekDTO();
+        dto.setId(model.getId());
         dto.setWeekNumber(model.getWeekNumber());
         if (model.getDays() != null){
             dto.setDays(model.getDays().stream()
@@ -306,6 +307,7 @@ public class Converter {
 
     public static PlanDayDTO convertPlanDayToDTO(PlanDay model) {
         PlanDayDTO dto = new PlanDayDTO();
+        dto.setId(model.getId());
         dto.setDayNumber(model.getDayNumber());
         dto.setGoal(model.getGoal());
         dto.setTask(model.getTask());
@@ -315,12 +317,14 @@ public class Converter {
 
     public static CopingMechanismDTO convertCopingMechanismToDTO(CopingMechanism model) {
         CopingMechanismDTO dto = new CopingMechanismDTO();
+        dto.setId(model.getId());
         dto.setContent(model.getContent());;
         return dto;
     }
 
     public static PlanPhaseDTO convertPlanPhaseToDTO(PlanPhase model) {
         PlanPhaseDTO dto = new PlanPhaseDTO();
+        dto.setId(model.getId());
         dto.setGoal(model.getGoal());
         dto.setPhaseNumber(model.getPhaseNumber());
         dto.setWeekRange(model.getWeekRange());

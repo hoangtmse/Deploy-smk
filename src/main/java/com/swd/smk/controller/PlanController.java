@@ -58,7 +58,7 @@ public class PlanController {
 
     @GetMapping("/user/get-plan-week-by-plan/{planId}")
     public ResponseEntity<Response> getPlanWeekByPlanId(@PathVariable Long planId) {
-        Response response = planWeekService.getPlanWeekByPlanId(planId);
+            Response response = planWeekService.getPlanWeekByPlanId(planId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

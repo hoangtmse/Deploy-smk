@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PlanPhaseDTO {
+    private Long id;
     private int phaseNumber;
     private String weekRange;
     private String goal;

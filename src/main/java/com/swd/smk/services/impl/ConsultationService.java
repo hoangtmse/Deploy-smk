@@ -100,7 +100,7 @@ public class ConsultationService implements IConsultationService {
                             "Consultation Date: " + consultation.getConsultationDate() + "\n" +
                             "Google Meet Link: " + consultation.getGoogleMeetLink(),
                             "hoangtmse183217@fpt.edu.vn") ;
-            consultation.setStatus(Status.ACTIVE);
+            consultation.setStatus(Status.BOOKED);
             consultation.setDateCreated(LocalDate.now());
             consultation.setDateUpdated(LocalDate.now());
             consultationRepository.save(consultation);

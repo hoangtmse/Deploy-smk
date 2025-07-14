@@ -16,7 +16,10 @@ public class CorsConfig {
                 // Chỉ cho phép truy cập từ frontend (địa chỉ của bạn)
                 registry.addMapping("/**")
                         .allowedMethods("GET", "POST", "DELETE", "PUT")
-                        .allowedOrigins("http://localhost:5173");// Địa chỉ frontend của bạn
+                        .allowedOrigins(
+                                "http://localhost:5173",
+                                "https://smoke-oc54lyts7-chubdans-projects.vercel.app"
+                        );
             }
         };
     }

@@ -46,6 +46,7 @@ public class CopyMechanismService implements ICopingMechanism {
             response.setCopingMechanism(Converter.convertCopingMechanismToDTO(copingMechanism));
 
             Notification notification = new Notification();
+            notification.setMember(copingMechanism.getPlan().getMember());
             notification.setTitle("Coping Mechanism Updated");
             notification.setMessage("The coping mechanism with phase " + copingMechanism.getPlan().getPhases() + " has been updated.");
             notification.setSentDate(LocalDateTime.now());

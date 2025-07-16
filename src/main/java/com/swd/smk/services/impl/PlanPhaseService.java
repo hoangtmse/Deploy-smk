@@ -47,6 +47,7 @@ public class PlanPhaseService implements IPlanPhase {
 
             // Optionally, create a notification for the update
             Notification notification = new Notification();
+            notification.setMember(planPhase.getPlan().getMember());
             notification.setTitle("Plan Phase Updated");
             notification.setMessage("The plan phase with week rage " + planPhase.getWeekRange()  + " has been updated.");
             notification.setSentDate(LocalDateTime.now());

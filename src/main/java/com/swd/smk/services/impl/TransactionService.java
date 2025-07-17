@@ -121,6 +121,12 @@ public class TransactionService implements ITransactionService {
                     .orElseThrow(() -> new OurException("Transaction not found with ID: " + transactionId));
             transaction.setStatus(Status.DELETED);
             transactionRepository.save(transaction);
+            Member member = transaction.getMember();
+            if (member != null) {
+                member.setMembership_Package(null); // Clear membership package
+                member.setJoinDate(null); // Clear join date
+                memberRepository.save(member);
+            }
             response.setStatusCode(200);
             response.setMessage("Transaction deleted successfully.");
         } catch (OurException e) {

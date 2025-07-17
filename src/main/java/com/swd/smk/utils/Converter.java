@@ -9,7 +9,11 @@ import com.swd.smk.model.plandetails.PlanDay;
 import com.swd.smk.model.plandetails.PlanPhase;
 import com.swd.smk.model.plandetails.PlanWeek;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -330,5 +334,9 @@ public class Converter {
         dto.setWeekRange(model.getWeekRange());
         dto.setStrategies(new ArrayList<>(model.getStrategies()));
         return dto;
+    }
+
+    public static LocalDateTime convertToLocalDateTime(Date date) {
+        return date.toInstant().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime();
     }
 }

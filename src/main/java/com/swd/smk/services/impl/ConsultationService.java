@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -76,6 +78,31 @@ public class ConsultationService implements IConsultationService {
                 consultation.setMember(memberRepository.findById(consultationDTO.getMemberId()).get());
             } else {
                 throw new OurException("Member id is required");
+            }
+
+            // validate consultation date
+            Date now = new Date();
+            if (consultationDTO.getConsultationDate() == null) {
+                throw new OurException("Consultation date is required");
+            }
+            if (consultationDTO.getConsultationDate().isBefore(LocalDateTime.now())) {
+                throw new OurException("Consultation date cannot be in the past");
+            }
+            if(consultationDTO.getStartDate() == null || consultationDTO.getEndDate() == null) {
+                throw new OurException("Start and end date are required");
+            }
+            if(consultationDTO.getStartDate().after(consultationDTO.getEndDate())) {
+                throw new OurException("Start date cannot be after end date");
+            }
+            if(consultationDTO.getEndDate().before(consultationDTO.getStartDate())) {
+                throw new OurException("End date cannot be before start date");
+            }
+            if(consultationDTO.getStartDate().before(now) || consultationDTO.getEndDate().before(now)) {
+                throw new OurException("Start and end date cannot be in the future");
+            }
+            LocalDateTime startDate = Converter.convertToLocalDateTime(consultationDTO.getStartDate());
+            if (!startDate.truncatedTo(ChronoUnit.SECONDS).isEqual(consultationDTO.getConsultationDate())) {
+                throw new OurException("Start date must be the same as consultation date");
             }
 
             consultation.setNotes(consultationDTO.getNotes());

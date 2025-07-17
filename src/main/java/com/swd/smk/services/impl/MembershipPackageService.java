@@ -226,7 +226,7 @@ public class MembershipPackageService implements IMembershipPackage {
             vnp_Params.put("vnp_BankCode", "VNBANK"); // hoặc bỏ nếu không chọn sẵn ngân hàng
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
             vnp_Params.put("vnp_Locale", "vn");
-            vnp_Params.put("vnp_ReturnUrl", vnpayProperties.getReturnUrl() + "?memberId=" + memberId + "&packageId=" + packageId);
+            vnp_Params.put("vnp_ReturnUrl", vnpayProperties.getReturnUrl().trim() + "?memberId=" + memberId + "&packageId=" + packageId);
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr); // Thay thế bằng IP thực tế nếu cần
 
 //            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
